@@ -68,7 +68,9 @@ public class Transformateur1ContratCadreAcheteur extends Transformateur1ContratC
 	@Override
 	public void receptionner(Object produit, double quantite, ExemplaireContratCadre contrat) {
 		stockFeve.put(((Feve)produit), stockFeve.get(contrat.getProduit())+quantite);
+		
 		journalCCA.ajouter("Je receptionne "+ quantite + "kg de "+ (Feve)produit);
+		journalCCA.ajouter("Le nouveau stock de "+((Feve)produit)+" est de "+ stockFeve.get((Feve)produit));
 	}
 	
 	// Alexandre

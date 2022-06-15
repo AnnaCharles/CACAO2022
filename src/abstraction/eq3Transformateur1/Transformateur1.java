@@ -199,13 +199,13 @@ public class Transformateur1 extends Transformateur1AppelsOffres implements IMar
 		for (Chocolat c : stockChoco.keySet()) {
 			cout = cout + stockChoco.get(c)*coutStockage;
 		}
-		journal.ajouter("stock choco BQ"+ stockChoco.get(Chocolat.BQ));
+		journal.ajouter("stock choco BQ "+ stockChoco.get(Chocolat.BQ));
 		
-		journal.ajouter("stock choco MQ"+ stockChoco.get(Chocolat.MQ));
+		journal.ajouter("stock choco MQ "+ stockChoco.get(Chocolat.MQ));
 		
-		journal.ajouter("stock choco MQ_BE"+ stockChoco.get(Chocolat.MQ_BE));
+		journal.ajouter("stock choco MQ_BE "+ stockChoco.get(Chocolat.MQ_BE));
 		
-		journal.ajouter("stock choco MQ_O"+ stockChoco.get(Chocolat.MQ_O));
+		journal.ajouter("stock choco MQ_O "+ stockChoco.get(Chocolat.MQ_O));
 		journal.ajouter("Notre cout de stockage est "+ cout);
 		return cout;
 	}
@@ -468,10 +468,8 @@ public class Transformateur1 extends Transformateur1AppelsOffres implements IMar
 					if (retenue!=null) {
 						stockChoco.put(c, stockChoco.get(c)-retenue.getOffre().getQuantiteKG());
 
-						journalAO.ajouter("vente de "+retenue.getOffre().getQuantiteKG()+" kg de " + retenue.getOffre().getChocolat()+" a "+retenue.getAcheteur().getNom());
-
 						stockChocoPeremption.venteLot(c, retenue.getOffre().getQuantiteKG());
-						journal.ajouter("vente de "+retenue.getOffre().getQuantiteKG()+" kg a "+retenue.getAcheteur().getNom());
+						journalAO.ajouter("vente de "+retenue.getOffre().getQuantiteKG()+" kg a "+retenue.getAcheteur().getNom());
 //github.com/AnnaCharles/CACAO2022
 						
 					} else {
