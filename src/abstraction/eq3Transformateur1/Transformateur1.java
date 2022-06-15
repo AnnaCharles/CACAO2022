@@ -296,14 +296,16 @@ public class Transformateur1 extends Transformateur1AppelsOffres implements IMar
 			for (Chocolat c : dernierPrixVenteChoco.getChocolats()) {
 				/** si aucune vente de ce chocolat avec ce distributeur n'a ete effectuee, on garde les valeurs precedentes 
 				 *  au sinon, on ecrase*/
-				if (Double.compare(dernierPrixVenteChocoReset.getPrix(distrib, c), 0.) != 0) {
-					journal.ajouter("le dernier prix de vente du chocolat " + c + " au distributeur" + distrib+ " est de " + dernierPrixVenteChoco.getPrix(distrib, c));
-					
-					dernierPrixVenteChoco.setPrix(distrib, c, dernierPrixVenteChocoReset.getPrix(distrib, c));
-				}
-				else {
-					journal.ajouter("On n'a pas encore vendu de chocolat " + c + " au distributeur" + distrib);
-					
+				if (Filiere.LA_FILIERE.getDistributeurs().contains(distrib)) {
+					if (Double.compare(dernierPrixVenteChocoReset.getPrix(distrib, c), 0.) != 0) {
+						journal.ajouter("le dernier prix de vente du chocolat " + c + " au distributeur" + distrib+ " est de " + dernierPrixVenteChoco.getPrix(distrib, c));
+						
+						dernierPrixVenteChoco.setPrix(distrib, c, dernierPrixVenteChocoReset.getPrix(distrib, c));
+					}
+					else {
+						journal.ajouter("On n'a pas encore vendu de chocolat " + c + " au distributeur" + distrib);
+						
+					}
 				}
 			}
 		}
@@ -372,7 +374,7 @@ public class Transformateur1 extends Transformateur1AppelsOffres implements IMar
 				
 				if (this.achete(f)) {
 					// creation de l'echeancier
-					Echeancier echeancier = new Echeancier(Filiere.LA_FILIERE.getEtape()+1, 5, this.quantiteAchatFeve.get(f)*0.5-quantiteFeveContrat);
+					Echeancier echeancier = new Echeancier(Filiere.LA_FILIERE.getEtape()+1, 5, Math.min(this.quantiteAchatFeve.get(f)*0.5-quantiteFeveContrat, 1000.));
 					// initiation d'un contrat cadre avec producteur 1
 					ExemplaireContratCadre contrat = ((SuperviseurVentesContratCadre)(Filiere.LA_FILIERE.getActeur("Sup.CCadre"))).demandeAcheteur(
 							(IAcheteurContratCadre)this, 

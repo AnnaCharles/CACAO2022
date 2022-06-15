@@ -41,10 +41,10 @@ public class dernierPrixVenteChoco {
 	/** Getter
 	 *  Alexandre*/
 	public double getPrix(String distributeur, Chocolat chocolat) {
-		//System.out.println("prixVente vide ? "+ this.getPrixVente().isEmpty());
-		//System.out.println(this.getPrixVente().keySet());
-		//System.out.println(distributeur);
-		//System.out.println(chocolat.toString());
+		System.out.println("prixVente vide ? "+ this.getPrixVente().isEmpty());
+		System.out.println(this.getPrixVente().keySet());
+		System.out.println(distributeur);
+		System.out.println(chocolat.toString());
 		return this.getPrixVente().get(distributeur).get(chocolat);
 	}
 	
