@@ -8,11 +8,15 @@ import java.util.List;
 import abstraction.eq8Romu.filiere.Filiere;
 import abstraction.eq8Romu.produits.Feve;
 
-//auteure : Fiona 
+//auteur : Fiona 
 
-public class Producteur2Plantation{
+
+public abstract class Producteur2Plantation  {
+	
 	
 	private HashMap<Arbre, List<Parcelle>> NbParcelles;
+	protected boolean MainOeuvremecontente;
+	private double ImpactMecontentement;
 	
 	public Producteur2Plantation () {
 		//auteure : Fiona
@@ -35,6 +39,7 @@ public class Producteur2Plantation{
 		 */
 		
 		this.NbParcelles = new HashMap<Arbre, List<Parcelle>>();
+		this.ImpactMecontentement = 1; // c'est-à-dire que le rendement n'est pas modifié 
 		
 		// 1 parcelle = 10 000 arbres 
 		
@@ -56,7 +61,7 @@ public class Producteur2Plantation{
 		}
 		System.out.println("fin plant");	
 	}
-	
+	public abstract double getSolde();
 	public ArrayList<Integer> ListeQt(int NbTotalArbres) {
 		//auteure : Fiona
 		
@@ -106,7 +111,7 @@ public class Producteur2Plantation{
 	}
 	
 	public int proportionBio() {
-		// auteure : Fiona
+		// auteur : Fiona
 		int total = 0;
 		int bio = 0;
 		Arbre[] arbres = {Arbre.ARBRE_HGB,Arbre.ARBRE_HG,Arbre.ARBRE_MGB,Arbre.ARBRE_MG,Arbre.ARBRE_BG};
@@ -126,20 +131,46 @@ public class Producteur2Plantation{
 
 	}
 	
+	public abstract double proportionVente(Feve f);
+	
+	public Feve FevePlusVendue() {
+
+		double prop_prec = 0.0;
+		Feve res = null;
+		
+		for(Feve f : Feve.values()) {
+			if (proportionVente(f) > prop_prec) {
+				res = f;
+			}
+			
+			prop_prec = proportionVente(f);
+		}
+		return res;
+	}
+	
 	
 	
 	public void renouvellement() {
-		//auteure : Fiona
-		
+		//auteur : Fiona
+	
 		/* 
-		 * Pour le moment on replante automatiquement les arbres qui sont arrivés au bout de leur durée de vie en conservant le type d'arbre.  
+		 * On ne replante que quand des arbres sont arrivés au bout de leur durée de vie, ie qu'on 
+		 * n'augmente notre parc initial en termes de quantités. 
+		 * 
+		 * Dans Producteur2VendeurContratCadre, proportionVente(Feve f) permet de donner la 
+		 * proportion que représente les ventes de fèves f par rapport aux ventes totales de contrats
+		 * cadres pour les 50 derniers steps. 
+		 * A partir de ces données, on décide de replanter tel ou tel type de fève. 
+		 *
 		 */	
+		
+
 		Arbre[] arbres = {Arbre.ARBRE_HGB,Arbre.ARBRE_HG,Arbre.ARBRE_MGB,Arbre.ARBRE_MG,Arbre.ARBRE_BG};
 		for (Arbre a: arbres) {
 			
 			List<Parcelle> ListeParcelles = this.NbParcelles.get(a);
 			List<Parcelle> ParcellesASupprimer = new ArrayList<Parcelle>();
-			
+		
 			for (Parcelle p : ListeParcelles) {
 				if (p.getAge() == a.getDureeVie()) {
 					ParcellesASupprimer.add(p);	
@@ -158,7 +189,7 @@ public class Producteur2Plantation{
 
 	
 	public Arbre conversion(Feve typefeve) {
-		//auteure : Fiona
+		//auteur : Fiona
 		
 		// permet de connnaître le type d'arbre en connaissant le type de fève 
 		
@@ -181,43 +212,61 @@ public class Producteur2Plantation{
 	}
 	
 	public int RendementParcelle(Parcelle p) {
+		
+		// auteur : Fiona 
+		
+		/*
+		 * Le rendement de la parcelle va dépendre de l'état / de l'existence d'une maladie dans la parcelle
+		 * et de l'existence ou non dentensions géopolitiques. 
+		 * Sa valeur est aussi diminuée en cas de présence de parasites dans la parcelle.
+		 * Finalement, le rendement est encore diminué de 20% si les salariés sont mécontents. 
+		 */
+		
+		if (MainOeuvremecontente) {
+			this.ImpactMecontentement = 0.8;
+			
+		}
+		else {
+			
+		}
+		
 		if (p.isAleaClimatique() == true) {
 			return 0;
 		}
 		else if  (p.getStadeMaladie() == 1 || Filiere.LA_FILIERE.getEtape()-p.getDebutMaladie()<=2) {
 			if (p.getAge() > p.getTypeArbre().getDureeCroissance()) {
 
-				return (int) (p.getImpactRendementParasite()*p.getTypeArbre().getRendementFinal() * 0.85);
+				return (int) (this.ImpactMecontentement*p.getImpactRendementParasite()*p.getTypeArbre().getRendementFinal() * 0.85);
 			}
 			else {
-				return (int) (p.getImpactRendementParasite()*p.getRendementProgressif()  * 0.85);
+				return (int) (this.ImpactMecontentement*p.getImpactRendementParasite()*p.getRendementProgressif()  * 0.85);
 			} 		
 		}
 		
 		else if (p.getStadeMaladie() == 2 || Filiere.LA_FILIERE.getEtape()-p.getDebutMaladie()<=5) {
 			if (p.getAge() > p.getTypeArbre().getDureeCroissance()) {
-				return (int) (p.getImpactRendementParasite()*p.getTypeArbre().getRendementFinal() * 0.85);
+				return (int) (this.ImpactMecontentement*p.getImpactRendementParasite()*p.getTypeArbre().getRendementFinal() * 0.85);
 			}
 			else {
-				return (int) (p.getImpactRendementParasite()*p.getRendementProgressif()  * 0.85);
+				return (int) (this.ImpactMecontentement*p.getImpactRendementParasite()*p.getRendementProgressif()  * 0.85);
 			} 		
 		}
 		
 		else if (p.getStadeMaladie() == 3 || Filiere.LA_FILIERE.getEtape()-p.getDebutMaladie()<=4) {
 			if (p.getAge() > p.getTypeArbre().getDureeCroissance()) {
-				return (int) (p.getImpactRendementParasite()*p.getTypeArbre().getRendementFinal() * 0.8);
+				return (int) (this.ImpactMecontentement*p.getImpactRendementParasite()*p.getTypeArbre().getRendementFinal() * 0.8);
 			}
 			else {
-				return (int) (p.getImpactRendementParasite()*p.getRendementProgressif()  * 0.8);
+				return (int) (this.ImpactMecontentement*p.getImpactRendementParasite()*p.getRendementProgressif()  * 0.8);
 			} 		
 		}
 		
 		else if (p.getStadeMaladie() == 4 || Filiere.LA_FILIERE.getEtape()-p.getDebutMaladie()<=4) {
 			if (p.getAge() > p.getTypeArbre().getDureeCroissance()) {
-				return (int) (p.getImpactRendementParasite()*p.getTypeArbre().getRendementFinal() * 0.85);
+				return (int) (this.ImpactMecontentement*p.getImpactRendementParasite()*p.getTypeArbre().getRendementFinal() * 0.85);
 			}
 			else {
-				return (int) (p.getImpactRendementParasite()*p.getRendementProgressif()  * 0.85);
+				return (int) (this.ImpactMecontentement*p.getImpactRendementParasite()*p.getRendementProgressif()  * 0.85);
 			} 		
 		}
 		
@@ -231,10 +280,10 @@ public class Producteur2Plantation{
 		
 		else {
 				if (p.getAge() > p.getTypeArbre().getDureeCroissance()) {
-					return (int) (p.getImpactRendementParasite()*p.getTypeArbre().getRendementFinal());
+					return (int) (this.ImpactMecontentement*p.getImpactRendementParasite()*p.getTypeArbre().getRendementFinal());
 				}
 				else {
-					return (int) (p.getImpactRendementParasite()*p.getRendementProgressif());
+					return (int) (this.ImpactMecontentement*p.getImpactRendementParasite()*p.getRendementProgressif());
 				} 		
 			}
 		
@@ -250,7 +299,7 @@ public class Producteur2Plantation{
 	
 	
 	public double production(Feve typefeve) {
-		//auteure : Fiona
+		//auteur : Fiona
 		
 		
 		// permet de connaître la production, en kg, pour un type de fève donné 
@@ -269,7 +318,7 @@ public class Producteur2Plantation{
 	}
 	
 	public int getNbArbre(Feve feve) {
-		//auteure : Fiona
+		//auteur : Fiona
 		
 		Arbre arbre = conversion(feve);
 		return this.NbParcelles.get(arbre).size()*10000 ;

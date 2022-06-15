@@ -389,11 +389,11 @@ public class Transformateur1 extends Transformateur1AppelsOffres implements IMar
 						mesContratEnTantQueAcheteur.add(contrat);
 					}
 				}
-			}/** else if (f == Feve.FEVE_MOYENNE_BIO_EQUITABLE) { // BE => prod 2
+			}else if (f == Feve.FEVE_MOYENNE_BIO_EQUITABLE) { // BE => prod 2
 				// desire t on un CC  ?
 				if (this.achete(f)) {
 					// creation de l'echeancier
-					Echeancier echeancier = new Echeancier(Filiere.LA_FILIERE.getEtape()+1, 5, this.quantiteAchatFeve.get(f)*0.5-quantiteFeveContrat);
+					Echeancier echeancier = new Echeancier(Filiere.LA_FILIERE.getEtape()+1, 5, Math.min(this.quantiteAchatFeve.get(f)*0.5-quantiteFeveContrat, 1000.));
 					// initiation d'un contrat cadre avec producteur 2
 					((SuperviseurVentesContratCadre)(Filiere.LA_FILIERE.getActeur("Sup.CCadre"))).demandeAcheteur(
 							(IAcheteurContratCadre)this, 
@@ -403,7 +403,7 @@ public class Transformateur1 extends Transformateur1AppelsOffres implements IMar
 							cryptogramme, 
 							false);
 				}
-			}*/
+			}
 		}
 		
 		

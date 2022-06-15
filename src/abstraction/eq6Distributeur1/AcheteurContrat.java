@@ -14,6 +14,7 @@ import abstraction.eq8Romu.contratsCadres.SuperviseurVentesContratCadre;
 import abstraction.eq8Romu.filiere.Filiere;
 import abstraction.eq8Romu.general.Journal;
 import abstraction.eq8Romu.produits.ChocolatDeMarque;
+import abstraction.eq8Romu.produits.Gamme;
 
 public class AcheteurContrat extends DistributeurChocolatDeMarque implements IAcheteurContratCadre{//leorouppert
 	protected Journal journalNegociationCC;
@@ -63,7 +64,7 @@ public class AcheteurContrat extends DistributeurChocolatDeMarque implements IAc
 	private void negoReussie(ExemplaireContratCadre ecc) {
 		journalNegociationCC.ajouter(Color.GREEN, Color.BLACK, "Négociation réussie ! Contrat #" + ecc.getNumero());
 		mesContrats.add(ecc);
-		enRetard.put(ecc.getNumero(),  false);
+		enRetard.put(ecc.getNumero(), false);
 		setPrixVente((ChocolatDeMarque)ecc.getProduit(), ecc.getPrix());
 	}
 	
@@ -96,9 +97,9 @@ public class AcheteurContrat extends DistributeurChocolatDeMarque implements IAc
 			if (e1.getQuantite(i) > e2.getQuantite(i)) {
 				return -1.0;
 			}
-			delta += Math.abs(e2.getQuantite(i) - e1.getQuantite(i));
+			delta += e1.getQuantite(i) - e2.getQuantite(i);
 		}
-		return (delta / getSomme(intersection[0], intersection[1], e2));
+		return delta;
 	}
 	
 	@Override
@@ -113,12 +114,14 @@ public class AcheteurContrat extends DistributeurChocolatDeMarque implements IAc
 		if (voulu == null) return null;
 		double delta = echenacierDelta(contrat.getEcheancier(), voulu);
 		journalNegociationCC.ajouter("--> Delta de ce qu'on voulait de: " + delta);
-		if (delta != -1.0){ // TODO: Pour l'instant on s'assure juste qu'il n'y a pas de surplus
-			journalNegociationCC.ajouter("--> Nous acceptons son écheancier");
+		if (delta <= 0){ // TODO: Pour l'instant on s'assure juste qu'il n'y a pas de surplus
 			return contrat.getEcheancier();
 		}
 		else {
-			return voulu;
+			if (contrat.getQuantiteTotale() > voulu.getQuantiteTotale()* 1.3) {
+				return voulu;
+			}
+			return contrat.getEcheancier();
 		}
 	}
 
@@ -151,7 +154,7 @@ public class AcheteurContrat extends DistributeurChocolatDeMarque implements IAc
 	public void receptionner(Object produit, double quantite, ExemplaireContratCadre contrat) {
 		double qteAttendu = contrat.getQuantiteALivrerAuStep();
 		if (quantite != qteAttendu) {
-			enRetard.put(contrat.getNumero(), true);
+			// enRetard.put(contrat.getNumero(), true);
 			journalSuiviCC.ajouter(Color.RED, Color.BLACK, "Il manque " + (qteAttendu - quantite) + "Kg de ce que nous etions censé recevoir de " + contrat.getVendeur().getNom() + " pour le contrat #" + contrat.getNumero());
 			
 		}
@@ -185,9 +188,9 @@ public class AcheteurContrat extends DistributeurChocolatDeMarque implements IAc
 			res.put(choco, new Echeancier());
 		}
 		for (ExemplaireContratCadre ecd : mesContrats) {
-			if (enRetard.get(ecd.getNumero())) {
-				continue;
-			}
+			// if (enRetard.get(ecd.getNumero())) {
+			// 	continue;
+			// }
 			ChocolatDeMarque cm = (ChocolatDeMarque) ecd.getProduit();
 			Echeancier e = ecd.getEcheancier();
 			int start = (e.getStepDebut() < Filiere.LA_FILIERE.getEtape()+1) ? Filiere.LA_FILIERE.getEtape()+1 : e.getStepDebut();
@@ -217,11 +220,14 @@ public class AcheteurContrat extends DistributeurChocolatDeMarque implements IAc
 
 	private Echeancier createEcheancier(Echeancier aCombler, int stepDebut, ChocolatDeMarque c) {
 		Echeancier e = new Echeancier(stepDebut);
+		double stock = NotreStock.getStock(c);
 		for (int i = stepDebut; i < stepDebut + 24; i++) {
 			double aComblerI = (aCombler == null) ? 0 : aCombler.getQuantite(i);
-			double aAjouter = getPartMarque(c) * partCC*Filiere.LA_FILIERE.getVentes(c, (i%24)-24) * partDuMarcheVoulu(c.getChocolat()) - aComblerI;
-			if (aAjouter > 0) {
-				e.ajouter(aAjouter);
+			stock += aComblerI;
+			double doitAvoir = partCC*Filiere.LA_FILIERE.getVentes(c, i-24) * partDuMarcheVoulu(c.getChocolat());
+			if (stock < doitAvoir) {
+				e.set(i, doitAvoir-stock);
+				stock = 0;
 			}
 		}
 		return e;
@@ -233,9 +239,12 @@ public class AcheteurContrat extends DistributeurChocolatDeMarque implements IAc
 		Map<ChocolatDeMarque, Echeancier> res = new HashMap<ChocolatDeMarque, Echeancier>();
 		Map<ChocolatDeMarque, Echeancier> echeancierTotal = getEcheanceParChoco();
 		for (ChocolatDeMarque choco : Filiere.LA_FILIERE.getChocolatsProduits()) {
+			//if (! achat.get(choco)) {
+			// continue;
+			//}
 			Echeancier eChoco = echeancierTotal.get(choco);
 			Echeancier e = createEcheancier(eChoco, Filiere.LA_FILIERE.getEtape()+1, choco);
-			if (e.getQuantiteTotale() >= SuperviseurVentesContratCadre.QUANTITE_MIN_ECHEANCIER && e.getQuantiteTotale() > SEUIL_AJOUT_ECHEANCE*attenduNProchainesEtapes(24, choco)*partDuMarcheVoulu(choco.getChocolat())*partCC*getPartMarque(choco)) {
+			if (e.getQuantiteTotale() >= SuperviseurVentesContratCadre.QUANTITE_MIN_ECHEANCIER && e.getQuantiteTotale() > SEUIL_AJOUT_ECHEANCE*attenduNProchainesEtapes(24, choco)*partDuMarcheVoulu(choco.getChocolat())*partCC) {
 				// Sinon cela ne sert à rien de faire un nouveau contrat cadre
 				res.put(choco, e);
 			}

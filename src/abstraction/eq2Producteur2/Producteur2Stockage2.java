@@ -13,7 +13,7 @@ import abstraction.eq8Romu.produits.Feve;
  *
  */
 
-public class Producteur2Stockage2 extends Producteur2Couts {
+public abstract class Producteur2Stockage2 extends Producteur2Couts {
 	
 	protected Integer cryptogramme;
 	protected HashMap<Feve,LinkedList<Stock>> Stocks;

@@ -4,11 +4,11 @@ import java.util.Random;
 
 import abstraction.eq8Romu.filiere.Filiere;
 
-//auteure : Fiona Martin 
+//auteur : Fiona Martin 
 
 public class Parcelle {
 	
-	//auteure : Fiona
+	//auteur : Fiona
 	
 	private Arbre TypeArbre;
 	private int Age;
@@ -22,7 +22,6 @@ public class Parcelle {
 	private double ImpactRendementParasite;
 	private boolean AleaClimatique;
 	private int DebutAleaClimatique; 
-	private int mecontentement;
 
 	
 	
@@ -30,7 +29,7 @@ public class Parcelle {
 	
 	public Parcelle(Arbre typearbre, int age) {
 		
-		//auteure : Fiona	
+		//auteur : Fiona	
 		
 		this.setTypeArbre(typearbre);
 		this.setAge(age);
@@ -286,11 +285,5 @@ public class Parcelle {
 		}
 	}
 
-	public int getMecontentement() {
-		return mecontentement;
-	}
 
-	public void setMecontentement(int mecontentement) {
-		this.mecontentement = mecontentement;
-	}
 }

@@ -13,7 +13,6 @@ import abstraction.eq8Romu.produits.ChocolatDeMarque;
 public class DistributeurChocolatDeMarque extends MarqueDistributeur1 implements IDistributeurChocolatDeMarque{
 
 	private Map<ChocolatDeMarque, Double> teteGondole; // (nom du chocolat,% en tête de gondole), Emma Humeau 
-	protected Journal journalVente; // Nathan
 	private double qteEnVenteTG; //Emma Humeau
 	protected VariableReadOnly totalVente; // Nathan
 
@@ -23,7 +22,6 @@ public class DistributeurChocolatDeMarque extends MarqueDistributeur1 implements
 	public DistributeurChocolatDeMarque() {
 		super();
 		totalVente = new VariableReadOnly("Total des ventes", this, 0);
-		journalVente = new Journal("Journal pour les ventes", this);
 		teteGondole = new HashMap<ChocolatDeMarque, Double>();
 	}
 
@@ -42,12 +40,12 @@ public class DistributeurChocolatDeMarque extends MarqueDistributeur1 implements
 	 * @author Nathan
 	 * @return La liste des journaux renvoyée dans Distributeur1Acteur et le journal de vente
 	 */
-	@Override
-	public List<Journal> getJournaux() {
-		List<Journal> j = super.getJournaux();
-		j.add(journalVente);
-		return j;
-	}
+	// @Override
+	// public List<Journal> getJournaux() {
+	// 	List<Journal> j = super.getJournaux();
+	// 	j.add(JournalVente);
+	// 	return j;
+	// }
 
 	/**
 	 * @return the teteGondole
@@ -98,13 +96,12 @@ public class DistributeurChocolatDeMarque extends MarqueDistributeur1 implements
 	public void vendre(ClientFinal client, ChocolatDeMarque choco, double quantite, double montant, int crypto) { //emma Humeau
 		NotreStock.addQte(choco, -quantite);
 		totalVente.ajouter(this, quantite, crypto);
-		journalVente.ajouter(quantite + " de " + choco + "vient d'être vendu");
 		HistoChoco.get(choco).ajouter(this,quantite,crypto); // Léo Historique qui mémorise les ventes
 	}
 
 	@Override
 	public void notificationRayonVide(ChocolatDeMarque choco, int crypto) { //Emma Humeau, Nathan
-			journalVente.ajouter("Rayon vide pour " + choco);
+			JournalVente.ajouter("Rayon vide pour " + choco);
 	}
 
 }

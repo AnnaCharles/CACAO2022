@@ -5,7 +5,7 @@ package abstraction.eq2Producteur2;
 import abstraction.eq8Romu.produits.Feve;
 
 public enum Arbre {
-	//auteure : Fiona
+	//auteur : Fiona
 	
 	ARBRE_HGB(60, 960, 2, 3, Feve.FEVE_HAUTE_BIO_EQUITABLE),
 	ARBRE_HG(75, 960, 2, 3, Feve.FEVE_HAUTE),
@@ -21,7 +21,7 @@ public enum Arbre {
 
 	
 	Arbre (double DC, double DV, double RF, double DA, Feve FA) {
-		//auteure : Fiona
+		//auteur : Fiona
 		
 		this.setDureeCroissance(DC);
 		this.setDureeVie(DV); 

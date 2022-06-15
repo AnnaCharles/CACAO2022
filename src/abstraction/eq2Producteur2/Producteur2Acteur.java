@@ -3,6 +3,7 @@ package abstraction.eq2Producteur2;
 
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -16,7 +17,7 @@ import abstraction.eq8Romu.general.VariableReadOnly;
 import abstraction.eq8Romu.produits.Chocolat;
 import abstraction.eq8Romu.produits.Feve;
 
-public class Producteur2Acteur extends Producteur2Stockage2 implements IActeur{
+public abstract class Producteur2Acteur extends Producteur2Stockage2 implements IActeur{
 	
 	protected int cryptogramme;
 	protected Journal journal;
@@ -26,28 +27,33 @@ public class Producteur2Acteur extends Producteur2Stockage2 implements IActeur{
 	private Variable StockFeveHaute;
 	private Variable StockFeveHaute_BE; 
 	private Variable StockChocoHQ;
+	private HashMap<Double, Double> Benefices;
+	private LinkedList<Double> Soldes;
+	private HashMap<Double, Boolean> AugmentationSalaires;
+
 
 	private Variable prixstockage ;
-//	private Variable dureeaffinageBQ ;
-//	private Variable dureeaffinageMQ ;
-//	private Variable dureeaffinageHQ ;
+
 	
 	// Auteur : Clément
 	
 	public Producteur2Acteur() {
 		super();
 		this.prixstockage= new Variable("Prix Stockage", "Prix en euros par kilo par step", this,  0.0, 1000000000, 0.01) ;
-//		this.dureeaffinageBQ= new VariableReadOnly("Durée affinage BQ","", this,  0.0, 1000000000, 1) ;
-//		this.dureeaffinageMQ= new VariableReadOnly("Durée affinage MQ","", this,  0.0, 1000000000, 2) ;
-//		this.dureeaffinageHQ= new VariableReadOnly("Durée affinage HQ","", this,  0.0, 1000000000, 3) ;
 		this.journal = new Journal(this.getNom()+" activites", this);
 		this.StockFeveBasse= new Variable("StockFeveBasse", "Stock de Fèves Basse", this, 0.0, 1000000000, this.getStock(Feve.FEVE_BASSE));
 		this.StockFeveMoyenne= new Variable("StockFeveMoyenne", "Stock de Fèves Moyenne", this, 0.0, 1000000000, this.getStock(Feve.FEVE_MOYENNE));
 		this.StockFeveMoyenne_BE= new Variable("StockFeveMoyenne_BE", "Stock de Fèves Moyenne BE", this, 0.0, 1000000000, this.getStock(Feve.FEVE_MOYENNE_BIO_EQUITABLE));
 		this.StockFeveHaute= new Variable("StockFeveHaute", "Stock de Fèves Haute", this, 0.0, 1000000000, this.getStock(Feve.FEVE_HAUTE));
 		this.StockFeveHaute_BE= new Variable("StockFeveHaute_BE", "Stock de Fèves Haute BE", this, 0.0, 1000000000, this.getStock(Feve.FEVE_HAUTE_BIO_EQUITABLE));
-//		this.StockChocoHQ = new Variable("StockChocoHQ","Stock de chocolat issue de fève de haute qualité", this, 0.0, 1000000000, this.getStockChoco(Chocolat.HQ_BE);
+		this.StockChocoHQ = new Variable("StockChocoHQ","Stock de chocolat issue de fève de haute qualité", this, 0.0, 1000000000, this.getStockChoco(Chocolat.HQ_BE));
 		
+
+//		this.StockChocoHQ = new Variable("StockChocoHQ","Stock de chocolat issue de fève de haute qualité", this, 0.0, 1000000000, this.getStockChoco(Chocolat.HQ_BE);
+		this.Benefices = new HashMap<Double, Double>();
+		this.Soldes = new LinkedList<Double>();
+		this.AugmentationSalaires = new HashMap<Double, Boolean>();
+		this.MainOeuvremecontente = false;
 	}
 
 	public void initialiser() {
@@ -65,15 +71,75 @@ public class Producteur2Acteur extends Producteur2Stockage2 implements IActeur{
 	public Color getColor() {
 		return new Color(46, 204, 113);
 	}
+	public abstract double getStockChoco(Chocolat choco);
 	
 
 	public void setCryptogramme(Integer crypto) {
 		this.cryptogramme = crypto;
 	}
 	
+	public HashMap<Double, Double> MAJBenefices() {
+		// auteur : Fiona 
+		/* 
+		 * Je calcule les bénéfices à chaque étape et je les "sauvegarde" dans la HashMAp Benefices
+		 * 
+		 * Ensuite, si sur les 3 derniers Step on est en bénéfice, j'augmente les salaires
+		 * (ie ajout de "True" dans la HashMap AugmentationSalaires pour le step courant) de 1% de 
+		 * notre bénéfice (certes cela peut sembler dérisoire mais les autres producteurs n'augmentent 
+		 * pas les salaires...)
+		 * 
+		 * Finalement, si on bout de 5 steps de bénéfices les salariés n'ont pas été augmenté, 
+		 * ils sont "mécontents" ce qui diminue le rendement (dans Producteur2Plantation).  
+		 * 
+		 */
+		
+		if (Filiere.LA_FILIERE.getEtape() == 0) {
+			this.Benefices.put((double) Filiere.LA_FILIERE.getEtape(), 0.0);
+			this.Soldes.add(this.getSolde());
+			this.AugmentationSalaires.put((double) Filiere.LA_FILIERE.getEtape(), false);
+			
+		}
+		
+		else {
+			double solde_prec = this.Soldes.getLast();
+			double benefice = this.getSolde() - solde_prec;
+			this.Benefices.put((double) Filiere.LA_FILIERE.getEtape(), benefice);
+		}
+		
+		if (Filiere.LA_FILIERE.getEtape() > 4 && this.Benefices.get((double)Filiere.LA_FILIERE.getEtape()-1)>0 && this.Benefices.get((double)Filiere.LA_FILIERE.getEtape()-2)>0  && this.Benefices.get((double)Filiere.LA_FILIERE.getEtape()-3)>0) {
+			double proba = Math.random();
+			if (proba < 0.33) {
+				this.AugmentationSalaires.put((double) Filiere.LA_FILIERE.getEtape(), true);
+				Filiere.LA_FILIERE.getBanque().virer(this, this.cryptogramme, Filiere.LA_FILIERE.getBanque(), this.Benefices.get((double)Filiere.LA_FILIERE.getEtape()-1)*0.01);
+			}
+			else {
+				this.AugmentationSalaires.put((double) Filiere.LA_FILIERE.getEtape(), false);
+			}
+			
+		}		
+		else {
+			this.AugmentationSalaires.put((double) Filiere.LA_FILIERE.getEtape(), false);
+		}
+		
+		
+		if (Filiere.LA_FILIERE.getEtape() > 6 && !this.AugmentationSalaires.get((double)Filiere.LA_FILIERE.getEtape()-1) && !this.AugmentationSalaires.get((double)Filiere.LA_FILIERE.getEtape()-2) && !this.AugmentationSalaires.get((double)Filiere.LA_FILIERE.getEtape()-3) && !this.AugmentationSalaires.get((double)Filiere.LA_FILIERE.getEtape()-4) && !this.AugmentationSalaires.get((double)Filiere.LA_FILIERE.getEtape()-5) ) {
+			this.MainOeuvremecontente = true;
+		}
+		else {
+			this.MainOeuvremecontente = false;
+		}
+		
+		return this.Benefices;
+
+	}
 
 	public void next() {
+		super.next();	
 		super.next();
+		
+		this.MAJBenefices();
+	
+		
 		// Cout de production, Jules DORE
 		this.setCoutParKg();
 		double coutProduction = 0.0;
@@ -97,15 +163,18 @@ public class Producteur2Acteur extends Producteur2Stockage2 implements IActeur{
 		journal.ajouter("Stock Feve Basse : "+this.getStock(Feve.FEVE_BASSE)+", Production Feve Basse : "+this.production(Feve.FEVE_BASSE)+", Nombre d'arbre Basse : "+this.getNbArbre(Feve.FEVE_BASSE)+"");
 		journal.ajouter("Stock Feve Haute BE : "+this.getStock(Feve.FEVE_HAUTE_BIO_EQUITABLE)+", Production Feve Haute BE : "+this.production(Feve.FEVE_HAUTE_BIO_EQUITABLE)+", Nombre d'arbre Haute BE : "+this.getNbArbre(Feve.FEVE_HAUTE_BIO_EQUITABLE)+"");
 		journal.ajouter("Stock Feve Moyenne BE : "+this.getStock(Feve.FEVE_MOYENNE_BIO_EQUITABLE)+", Production Feve Moyenne BE : "+this.production(Feve.FEVE_MOYENNE_BIO_EQUITABLE)+", Nombre d'arbre Moyenne BE : "+this.getNbArbre(Feve.FEVE_MOYENNE_BIO_EQUITABLE)+"");
+		journal.ajouter("Stock Choco Haute Qualité : "+this.getStockChoco(Chocolat.HQ_BE)+",Transformation Chocolat Haute Qualité : "+this.production(Feve.FEVE_HAUTE)*0.05);
 
 		this.GetStockHaute().setValeur(this, this.getStock(Feve.FEVE_HAUTE));
 		this.GetStockMoyenne().setValeur(this, this.getStock(Feve.FEVE_MOYENNE));
 		this.GetStockMoyenne_BE().setValeur(this, this.getStock(Feve.FEVE_MOYENNE_BIO_EQUITABLE));
 		this.GetStockBasse().setValeur(this, this.getStock(Feve.FEVE_HAUTE));
 		this.GetStockHausse_BE().setValeur(this, this.getStock(Feve.FEVE_HAUTE_BIO_EQUITABLE));	
+		this.GetStockChocoHQ().setValeur(this, this.getStockChoco(Chocolat.HQ_BE));
 	}
 	
 	public List<String> getNomsFilieresProposees() {
+		this.getSolde();
 		ArrayList<String> filieres = new ArrayList<String>();
 		filieres.add("Producteur2TestBourse"); 
 		return filieres;
@@ -125,6 +194,7 @@ public class Producteur2Acteur extends Producteur2Stockage2 implements IActeur{
 		res.add(StockFeveMoyenne_BE);
 		res.add(StockFeveHaute);
 		res.add(StockFeveHaute_BE);
+		res.add(StockChocoHQ);
 		return res;
 	}
 	
@@ -154,6 +224,7 @@ public class Producteur2Acteur extends Producteur2Stockage2 implements IActeur{
 	}
 	
 	// Renvoie le solde actuel de l'acteur
+	
 	public double getSolde() {
 		return Filiere.LA_FILIERE.getBanque().getSolde(this, this.cryptogramme);
 	}
@@ -173,6 +244,10 @@ public class Producteur2Acteur extends Producteur2Stockage2 implements IActeur{
 	public Variable GetStockHausse_BE() {
 		return StockFeveHaute_BE;
 	}
+	public Variable GetStockChocoHQ() {
+		return StockChocoHQ;
+	}
+
 
 
 

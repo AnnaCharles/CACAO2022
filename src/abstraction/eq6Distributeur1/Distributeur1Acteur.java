@@ -29,8 +29,9 @@ public class Distributeur1Acteur implements IActeur {
 	protected Stock NotreStock;
 	Random ran;
 	protected Map<ChocolatDeMarque,Variable> stockageQte;
-	protected Journal journal1;
-	protected Journal journalCompte;
+	protected Journal JournalPrincipal;
+	protected Journal JournalCompte;
+	protected Journal JournalVente;
 	protected List<Variable> prix; 
 	protected Double prixTotalTour;
 	protected Map<ChocolatDeMarque, Double> prixVente;
@@ -43,6 +44,8 @@ public class Distributeur1Acteur implements IActeur {
 	protected Double TauxTour; // renvoi la part de marché visée par FourAll pour le tour en cours
 	protected final double partCC = 0.9;
 	protected Journal stockJ;
+	protected Map<ChocolatDeMarque, Boolean> achat;
+	private Journal ceQuonAchete;
 	
 	/**
 	 * @return the notreStock
@@ -58,8 +61,12 @@ public class Distributeur1Acteur implements IActeur {
 	public Distributeur1Acteur() {
 		stockJ = new Journal("Stocks", this);
 		HistoChoco = new HashMap<ChocolatDeMarque, VariableReadOnly>(); // Léo
-		journal1 = new Journal("journal1",this);
-		journalCompte = new Journal("journalCompte",this);
+		JournalPrincipal = new Journal("Journal Principal",this);
+		JournalCompte = new Journal("Journal Compte",this);
+		JournalVente = new Journal("Journal des Ventes", this);
+		ceQuonAchete = new Journal("Ce qu'on achete", this);
+
+		achat = new HashMap<ChocolatDeMarque, Boolean>();
 
 		
 		this.prixTotalTour = 100000.0;
@@ -68,19 +75,16 @@ public class Distributeur1Acteur implements IActeur {
 		ran = new Random();
 		
 		this.ChocoTotalTour = 0.0;
-		
-		journal1 = new Journal("journal1",this);
-		journalCompte = new Journal("journalCompte",this);
 		NotreStock = new Stock(this);
 		for(ChocolatDeMarque c : this.getNotreStock().getMapStock().keySet()) 
 		{
-			journal1.ajouter("ajout d'une variable stock pour le chocolat" + c + "effectué" );
+			JournalPrincipal.ajouter("ajout d'une variable stock pour le chocolat" + c + "effectué" );
 			prix.add(new Variable(c+"",this,0));
-			journal1.ajouter("ajout d'une variable prix pour le chocolat " + c + "effectué");
+			JournalPrincipal.ajouter("ajout d'une variable prix pour le chocolat " + c + "effectué");
 		}	
 		
-		journal1.ajouter("création de la liste de variable des prix terminée");
-		journal1.ajouter("création de la liste de variable stock terminée");
+		JournalPrincipal.ajouter("création de la liste de variable des prix terminée");
+		JournalPrincipal.ajouter("création de la liste de variable stock terminée");
 	}
 	
 	
@@ -101,13 +105,37 @@ public class Distributeur1Acteur implements IActeur {
 		supCCadre = ((SuperviseurVentesContratCadre)(Filiere.LA_FILIERE.getActeur("Sup.CCadre")));
 		for (ChocolatDeMarque C : Filiere.LA_FILIERE.getChocolatsProduits()) {
 			HistoChoco.put(C, new VariableReadOnly(C.toString(), this,0));
+			achat.put(C, true);
+
 		}
 		NotreStock.initialiser();
 		
 	}
 
+	private int chocolatToInt(Chocolat c) {
+		switch (c) {
+			case BQ: return 1;
+			case BQ_O: return 2;
+			case MQ: return 3;
+			case MQ_O: return 4;
+			case MQ_BE: return 5;
+			case MQ_BE_O: return 6;
+			case HQ: return 7;
+			case HQ_BE: return 8;
+			case HQ_BE_O : return 9;
+			default: return 10;
+		}
+	}
+
 	private void afficherStockJournal() {
 		stockJ.ajouter(Color.BLACK, Color.WHITE, "------------------ Etape " + Filiere.LA_FILIERE.getEtape() + "--------------------");
+		List<ChocolatDeMarque> chocos = Filiere.LA_FILIERE.getChocolatsProduits();
+		chocos.sort((c1, c2) -> {
+			if (c1.getChocolat() == c2.getChocolat()) {
+				return c1.getMarque().compareTo(c2.getMarque());
+			}
+			return chocolatToInt(c1.getChocolat()) - chocolatToInt(c2.getChocolat());
+		});
 		for (ChocolatDeMarque c : Filiere.LA_FILIERE.getChocolatsProduits()) {
 			stockJ.ajouter(c + ": " + NotreStock.getStock(c));
 		}
@@ -116,9 +144,11 @@ public class Distributeur1Acteur implements IActeur {
 	
 	public void next() {
 		//leorouppert
-
-		journal1.ajouter("entrée dans next pour le tour n° " + Filiere.LA_FILIERE.getEtape());
-		getChocoTotalTour();
+		for (ChocolatDeMarque C : Filiere.LA_FILIERE.getChocolatsProduits()) {
+			JournalVente.ajouter("Ventes de " + C + " au tour  " +Filiere.LA_FILIERE.getEtape()+" : "+ (HistoChoco.get(C).getValeur(Filiere.LA_FILIERE.getEtape(),cryptogramme)-HistoChoco.get(C).getValeur(Filiere.LA_FILIERE.getEtape()-1,cryptogramme)));
+			JournalVente.ajouter("Soit une part de marché de " + 0.01*Math.round(10000*(HistoChoco.get(C).getValeur(Filiere.LA_FILIERE.getEtape(),cryptogramme)-HistoChoco.get(C).getValeur(Filiere.LA_FILIERE.getEtape()-1,cryptogramme))/Filiere.LA_FILIERE.getVentes(C, Filiere.LA_FILIERE.getEtape())) + "%");
+		}
+		JournalPrincipal.ajouter("entrée dans next pour le tour n° " + Filiere.LA_FILIERE.getEtape());
 		/**
 		 *  
 		 * Gestion des compte -> retirer argent :
@@ -127,17 +157,27 @@ public class Distributeur1Acteur implements IActeur {
 		 */
 		//calcul cout sur le tour :
 		
-		journal1.ajouter(getDescription());
+		JournalPrincipal.ajouter(getDescription());
 		
 		prixTotalTour = NotreStock.getCoûtStockageTotale();
 		if (prixTotalTour > 0) {
 			Filiere.LA_FILIERE.getBanque().virer(this, this.cryptogramme, Filiere.LA_FILIERE.getBanque(), prixTotalTour);
-			journalCompte.ajouter("le compte a été débité de "+prixTotalTour);
-			journalCompte.ajouter("le il reste"+this.getSolde()+"sur le compte");
+			JournalCompte.ajouter("le compte a été débité de "+prixTotalTour);
+			JournalCompte.ajouter("le il reste"+this.getSolde()+"sur le compte");
 		}		
-		journal1.ajouter("Tour "+ Filiere.LA_FILIERE.getEtape() +" terminé pour "+ this.getNom());
+		JournalPrincipal.ajouter("Tour "+ Filiere.LA_FILIERE.getEtape() +" terminé pour "+ this.getNom());
 	
 		afficherStockJournal();
+		for (ChocolatDeMarque choco : Filiere.LA_FILIERE.getChocolatsProduits()) {
+			if (! achat.containsKey(choco)) {
+				achat.put(choco, true);
+
+			}
+			if (HistoChoco.get(choco).getValeur(Filiere.LA_FILIERE.getEtape() - 1) < 0.0001*NotreStock.getStock(choco)) {
+				ceQuonAchete.ajouter("on achetera plus de " + choco);
+				achat.put(choco, false);
+			}
+		}
 	}
 	
 	
@@ -187,9 +227,11 @@ public class Distributeur1Acteur implements IActeur {
 	@Override
 	public List<Journal> getJournaux() {
 		List<Journal> journaux = new ArrayList<Journal>();
-		journaux.add(journal1);
-		journaux.add(journalCompte);
+		journaux.add(JournalPrincipal);
+		journaux.add(JournalCompte);
 		journaux.add(stockJ);
+		journaux.add(ceQuonAchete);
+		journaux.add(JournalVente);
 		return journaux;
 	}
 
@@ -202,12 +244,12 @@ public class Distributeur1Acteur implements IActeur {
 	//EmmaHumeau
 	public void notificationFaillite(IActeur acteur) {
 		if (NotreStock.seuilSecuFaillite() == true) {
-			journal1.ajouter("on risque de faire faillite au prochain tour");
+			JournalPrincipal.ajouter("On risque de faire faillite au prochain tour");
 		}
 		}
 
 	public void notificationOperationBancaire(double montant) {
-		journalCompte.ajouter("Une opération vient d'avoir lieu d'un montant de " + montant);
+		JournalCompte.ajouter("Une opération vient d'avoir lieu d'un montant de " + montant);
 	}
 
 	// Renvoie le solde actuel de l'acteur
@@ -216,21 +258,6 @@ public class Distributeur1Acteur implements IActeur {
 		return Filiere.LA_FILIERE.getBanque().getSolde(this, this.cryptogramme);
 	}
 	
-	/**
-	 * @author Nolann
-	 * renvoie le nombre de kg de chocolats vendus au l'année précédente à la même période  
-	 */
-	public void getChocoTotalTour() {
-		
-		for(ChocolatDeMarque Choco : Filiere.LA_FILIERE.getChocolatsProduits()) {
-			this.ChocoTotalTour = this.ChocoTotalTour + Filiere.LA_FILIERE.getVentes(Choco, Filiere.LA_FILIERE.getEtape()-24);
-			journal1.ajouter("il y a eu : "+Filiere.LA_FILIERE.getVentes(Choco, Filiere.LA_FILIERE.getEtape()) +" kg de chocolats vendus de type " 
-			+ Choco + " au tour : " + (Filiere.LA_FILIERE.getEtape()-24));
-		}
-		journal1.ajouter("Il y a eu au total : " + this.ChocoTotalTour + "kg de chocolats vendus au total au tour : " + (Filiere.LA_FILIERE.getEtape()-24));
-	}
-	
-	
 
 	/**
 	 * @author Nathan
@@ -238,7 +265,7 @@ public class Distributeur1Acteur implements IActeur {
 	 * @param quantiteAchete
 	 */
 	public void setPrixVente(ChocolatDeMarque c, double prixAchatKilo) {
-		prixVente.put(c, 1.4*prixAchatKilo);
+		// prixVente.put(c, 1.4*prixAchatKilo);
 	}
 	
 	/**
@@ -248,9 +275,15 @@ public class Distributeur1Acteur implements IActeur {
 	 *  
 	 */
 	public void setAllprixVente( Map<ChocolatDeMarque,Double> prixAchat,  Map<ChocolatDeMarque,Double> quantiteAchete){
+		
 		prixAchat.forEach((key,value)->{
+		//if (ChocoTotalTour < 100) {                  //Emma Humeau, modif prix
+			//prixVente.put(key, (prixAchat.get(key)));
+		//}
+		//else {
 			prixVente.put(key, (prixAchat.get(key))*2);		
-		});
+		//}
+	});
 	}
 
 	public double partDuMarcheVoulu(Chocolat c) {
@@ -280,7 +313,7 @@ public class Distributeur1Acteur implements IActeur {
 		return count;
 	}
 	
-	public double getPartMarque(ChocolatDeMarque choco) {
+	/* public double getPartMarque(ChocolatDeMarque choco) {
 		double qualitePercuTotal = 0.0;
 		for (ChocolatDeMarque c : Filiere.LA_FILIERE.getChocolatsProduits()) {
 			if (c.getChocolat() == choco.getChocolat()) {
@@ -288,7 +321,7 @@ public class Distributeur1Acteur implements IActeur {
 			}
 		}
 		return Filiere.LA_FILIERE.qualitePercueMarque(choco.getMarque())/qualitePercuTotal;
-	}
+	} */
 
 	protected double facteurPrixChocolat(Chocolat c) {
 		double res = 1.0;
@@ -306,4 +339,5 @@ public class Distributeur1Acteur implements IActeur {
 		}
 		return res;
 	}
+
 }

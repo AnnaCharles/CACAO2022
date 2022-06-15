@@ -9,28 +9,30 @@ import abstraction.eq8Romu.filiere.IMarqueChocolat;
 import abstraction.eq8Romu.produits.Chocolat;
 import abstraction.eq8Romu.produits.ChocolatDeMarque;
 
-public class ExempleTransformateurVendeurContratCadre extends ExempleTransformateurContratCadreVendeurAcheteur implements IMarqueChocolat, IFabricantChocolatDeMarque {
+public class ExempleTransformateurVendeurContratCadre extends ExempleTransformateurContratCadreVendeurAcheteur
+		implements IMarqueChocolat, IFabricantChocolatDeMarque {
 
-    private Chocolat choco;
-    private String marque;
-    public ExempleTransformateurVendeurContratCadre(ChocolatDeMarque produit) {
-        super(produit);
-        choco = produit.getChocolat();
-        marque = produit.getMarque();
-    }
+	private Chocolat choco;
+	private String marque;
 
-    @Override
-    public List<String> getMarquesChocolat() {
-        List<String> marques = new ArrayList<String>();
-        marques.add(marque);
-        return marques;
-    }
+	public ExempleTransformateurVendeurContratCadre(ChocolatDeMarque produit) {
+		super(produit);
+		choco = produit.getChocolat();
+		marque = produit.getMarque();
+	}
 
-    @Override
-    public List<ChocolatDeMarque> getChocolatsProduits() {
-        List<ChocolatDeMarque> chocos = new ArrayList<ChocolatDeMarque>();
-        chocos.add(new ChocolatDeMarque(choco, marque));
-        return chocos;
-    }
-    
+	@Override
+	public List<String> getMarquesChocolat() {
+		List<String> marques = new ArrayList<String>();
+		marques.add(marque);
+		return marques;
+	}
+
+	@Override
+	public List<ChocolatDeMarque> getChocolatsProduits() {
+		List<ChocolatDeMarque> chocos = new ArrayList<ChocolatDeMarque>();
+		chocos.add(new ChocolatDeMarque(choco, marque));
+		return chocos;
+	}
+
 }
