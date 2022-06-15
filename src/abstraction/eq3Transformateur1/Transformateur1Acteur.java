@@ -18,6 +18,8 @@ public class Transformateur1Acteur implements IActeur {
 	protected Journal journalCCV;
 	protected Journal journalAO;
 	protected Journal journalB;
+	protected Journal journalSF;
+	protected Journal journalSC;
 	
 	protected int cryptogramme;
 	protected DicoFeve stockFeve;               /** Integer --> Double*/
@@ -33,6 +35,8 @@ public class Transformateur1Acteur implements IActeur {
 		this.journalCCV = new Journal("CC Vendeurs", this);
 		this.journalAO = new Journal("Appel d Offres", this);
 		this.journalB = new Journal("Bourse", this);
+		this.journalSF = new Journal("Stock fèves", this);
+		this.journalSC = new Journal("Stock choco", this);
 	}
 
 	public void initialiser() {
@@ -110,6 +114,8 @@ public class Transformateur1Acteur implements IActeur {
 		res.add(journalCCV);
 		res.add(journalAO);
 		res.add(journalB);
+		res.add(journalSC);
+		res.add(journalSF);
 		return res;
 	}
 

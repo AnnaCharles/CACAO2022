@@ -161,7 +161,7 @@ public class Transformateur1 extends Transformateur1AppelsOffres implements IMar
 	public void transfo(double quantiteFeveTransformee, Feve feve, boolean original) {
 		for (Feve f : stockFeve.keySet()) {
 			if (f == feve) {
-				stockFeve.put(feve, stockFeve.get(feve)-quantiteFeveTransformee);
+				stockFeve.put(feve, Math.max(0., stockFeve.get(feve)-quantiteFeveTransformee));
 			}
 		}
 		ArrayList<Double> coutQuantiteTransfo = this.coutQuantiteTransfo(this.choixTypeTransfo(feve.getGamme()), quantiteFeveTransformee, original);
@@ -195,10 +195,21 @@ public class Transformateur1 extends Transformateur1AppelsOffres implements IMar
 		double cout = 0.;
 		for (Feve f : stockFeve.keySet()) {
 			cout = cout + stockFeve.get(f)*coutStockage;
+			
+			if (f == Feve.FEVE_BASSE || f == Feve.FEVE_MOYENNE || f == Feve.FEVE_MOYENNE_BIO_EQUITABLE) {
+				journalSF.ajouter("stock de " + f.name() + " : " + stockFeve.get(f));
+				journalSF.ajouter("Cout de stockage " + f.name() + " : " + stockFeve.get(f)*coutStockage);
+			}
 		}
 		for (Chocolat c : stockChoco.keySet()) {
-			cout = cout + stockChoco.get(c)*coutStockage;
+			cout = cout + stockChoco.get(c)*coutStockage; 
+			
+			if (c == Chocolat.MQ_BE || c == Chocolat.MQ_O || c == Chocolat.MQ) {
+				journalSC.ajouter("stock de choco " + c.name() + " : " + stockChoco.get(c));
+				journalSC.ajouter("Cout de stockage Choco " + c.name() + " : " + stockChoco.get(c)*coutStockage);
+			}
 		}
+
 		journal.ajouter("stock choco BQ "+ stockChoco.get(Chocolat.BQ));
 		
 		journal.ajouter("stock choco MQ "+ stockChoco.get(Chocolat.MQ));
@@ -207,6 +218,9 @@ public class Transformateur1 extends Transformateur1AppelsOffres implements IMar
 		
 		journal.ajouter("stock choco MQ_O "+ stockChoco.get(Chocolat.MQ_O));
 		journal.ajouter("Notre cout de stockage est "+ cout);
+
+		journal.ajouter("Notre cout de stockage total est "+ cout);
+
 		return cout;
 	}
 	
@@ -315,7 +329,7 @@ public class Transformateur1 extends Transformateur1AppelsOffres implements IMar
 		for (Chocolat c : this.quantiteDemandeeChoco.keySet()) {
 			if (c == Chocolat.MQ_BE) {
 				qtBio = this.quantiteDemandeeChoco.get(c);
-			} else if (c == Chocolat.MQ_BE || c == Chocolat.MQ_O) {
+			} else if (c == Chocolat.MQ || c == Chocolat.MQ_O) {
 				qtNonBio = qtNonBio + this.quantiteDemandeeChoco.get(c);
 			}
 		}
@@ -323,7 +337,7 @@ public class Transformateur1 extends Transformateur1AppelsOffres implements IMar
 		for (Chocolat c : this.quantiteDemandeeChoco.keySet()) {
 			if (c == Chocolat.MQ_BE) {
 				this.demandeChocoPourcent.put(c, this.quantiteDemandeeChoco.get(c)/qtBio);
-			} else if (c == Chocolat.MQ_BE || c == Chocolat.MQ_O) {
+			} else if (c == Chocolat.MQ || c == Chocolat.MQ_O) {
 				this.demandeChocoPourcent.put(c, this.quantiteDemandeeChoco.get(c)/qtNonBio);
 			}
 		}
@@ -423,14 +437,16 @@ public class Transformateur1 extends Transformateur1AppelsOffres implements IMar
 							this.demandeChocoPourcent.get(Chocolat.MQ_O)*quantiteATransformer, 
 							true);                               
 					ArrayList<Double> prixQtSt = this.coutQuantiteTransfo(this.choixTypeTransfo(f.getGamme()), 
-							this.demandeChocoPourcent.get(Chocolat.MQ_BE)*quantiteATransformer, 
+							this.demandeChocoPourcent.get(Chocolat.MQ)*quantiteATransformer, 
 							false);                              
 					
 					// on verifie qu'on a l'argent pour payer la transformation
 					// defaut de cette condition : il peut arriver qu'on ait assez pour transformer mais plus assez pour ensuite stocker
 					if (prixQtO.get(0) + prixQtSt.get(0) < this.getSolde() ) {
+						this.journalSF.ajouter("demandeChocoPourcent MQ_O : " + this.demandeChocoPourcent.get(Chocolat.MQ_O));
+						this.journalSF.ajouter("demandeChocoPourcent MQ : " + this.demandeChocoPourcent.get(Chocolat.MQ));
 						this.transfo(this.demandeChocoPourcent.get(Chocolat.MQ_O)*quantiteATransformer, f, true);
-						this.transfo(this.demandeChocoPourcent.get(Chocolat.MQ_BE)*quantiteATransformer, f, false);
+						this.transfo(this.demandeChocoPourcent.get(Chocolat.MQ)*quantiteATransformer, f, false);
 					}
 				}
 				
