@@ -21,6 +21,7 @@ public abstract class Producteur1Producteur extends Producteur1Stock{
 	private int mecontentement_global_basse;
 	private int mecontentement_global_moyenne;
 	private int mecontentement_global_haute;
+	private double vente_tot;
 	
 	public Producteur1Producteur() {
 		super();
@@ -37,44 +38,48 @@ public abstract class Producteur1Producteur extends Producteur1Stock{
 		this.mecontentement_global_moyenne = 0;
 		this.mecontentement_global_haute =0;
 	}
-	
-	public Parc getGhana() {
+	 
+	public Parc getGhana() { //Écrit par Antoine
 		return ListeParc.get(0);
 	}
 	
-	public Parc getCote_divoire() {
+	public Parc getCote_divoire() { //Écrit par Antoine
 		return ListeParc.get(1);
 	}
 	
-	public Parc getNigeria() {
-		return ListeParc.get(2);
+	public Parc getNigeria() { //Écrit par Antoine
+		return ListeParc.get(2); 
 	}
 	
-	public Parc getCameroun() {
+	public Parc getCameroun() { //Écrit par Antoine
 		return ListeParc.get(3);
 	}
 	
-	public Parc getParc(int i) {
+	public Parc getParc(int i) { //Écrit par Antoine
 		return ListeParc.get(i);
 	}
 
-	public LinkedList<Parc> getListeParc() {
+	public LinkedList<Parc> getListeParc() { //Écrit par Antoine
 		return this.ListeParc;
 	}
 	
-	public int getMecontentement_basse() {
+	public int getMecontentement_basse() { //Écrit par Antoine
 		return this.mecontentement_global_basse;
 	}
 	
-	public int getMecontentement_moyenne() {
+	public int getMecontentement_moyenne() { //Écrit par Antoine
 		return this.mecontentement_global_moyenne;
 	}
 	
-	public int getMecontentement_haute() {
+	public int getMecontentement_haute() { //Écrit par Antoine
 		return this.mecontentement_global_haute;
 	}
 	
-	public void setMecontentement_basse(int i) {
+	public double getVente_tot() { //Écrit par Antoine
+		return this.vente_tot;
+	}
+	
+	public void setMecontentement_basse(int i) { //Écrit par Antoine
 		if (i<0) {
 			this.mecontentement_global_basse = 0;
 		}
@@ -83,7 +88,7 @@ public abstract class Producteur1Producteur extends Producteur1Stock{
 		}
 	}
 	
-	public void setMecontentement_moyenne(int i) {
+	public void setMecontentement_moyenne(int i) { //Écrit par Antoine
 		if (i<0) {
 			this.mecontentement_global_moyenne = 0;
 		}
@@ -92,13 +97,17 @@ public abstract class Producteur1Producteur extends Producteur1Stock{
 		}
 	}
 	
-	public void setMecontentement_haute(int i) {
+	public void setMecontentement_haute(int i) { //Écrit par Antoine
 		if (i<0) {
 			this.mecontentement_global_haute = 0;
 		}
 		else {
 			this.mecontentement_global_haute = i;
 		}
+	}
+	
+	public void setVente_tot(double d) { //Écrit par Antoine
+		this.vente_tot =d;
 	}
 	
 	//Écrit par Antoine
@@ -155,6 +164,8 @@ public abstract class Producteur1Producteur extends Producteur1Stock{
 	}
 	
 	public abstract HashMap<Feve, Double> getPrixmoyenFeve();
+	
+	public abstract HashMap<Parc, Double> getRepartitionGuerre();
 	
 	public void MAJMecontentement() { //A changer : on ne sait pas si on vend ou pas, on change juste le mécontentement sur le cours actuel -> paramétrer avec feve f ou un booléen de vente en entrée?
 		//Récupération prix actuels de la bourse
@@ -245,7 +256,9 @@ public abstract class Producteur1Producteur extends Producteur1Stock{
 	public void next() { //Écrit par Antoine
 		super.next();
 		HashMap<Feve, Double> venteChoco = this.getVenteChoco(true);
+		HashMap<Parc, Double> repartitionGuerre = this.getRepartitionGuerre();
 		for (int j=0; j<ListeParc.size();j++) {
+			boolean vente = false;
 			this.getParc(j).MAJAleas();
 			this.recolte = this.getParc(j).Recolte();
 			for (Feve f : this.getFeves().keySet()) {
@@ -253,7 +266,20 @@ public abstract class Producteur1Producteur extends Producteur1Stock{
 					this.addLot(f, this.recolte.get(f), this.getParc(j));
 				}
 			}
-			this.getParc(j).MAJParc(this.getMecontentement_basse(),this.getMecontentement_moyenne(),this.getMecontentement_haute(),venteChoco);
+			if (repartitionGuerre != null) {
+				for (Parc p : repartitionGuerre.keySet()) {
+					if (this.getParc(j) == p) {
+						// Si le parc vend on prend en compte le mécontentement lié à la vente
+						this.getParc(j).MAJParc(this.getMecontentement_basse(),this.getMecontentement_moyenne(),this.getMecontentement_haute(),venteChoco);
+						vente = true;
+					}
+				}
+			}
+			if (vente==false || repartitionGuerre == null) {
+				//Si le parc ne vend pas on ne prend pas en compte le mécontentement lié à la vente
+				this.getParc(j).MAJParc(0,0,0,venteChoco);
+			}
+			
 			this.getParc(j).MAJGuerre();
 		}
 		if (Filiere.LA_FILIERE.getEtape()>0) {
@@ -271,11 +297,16 @@ public abstract class Producteur1Producteur extends Producteur1Stock{
 		
 		for (int j=0;j<4;j++) {
 			prixTotal = prixTotal 
-					+ this.getParc(j).getNombre_BE_haute()*Filiere.LA_FILIERE.getParametre("CAC'AO40Prix Entretien Arbre").getValeur() 
-					+ this.getParc(j).getNombre_non_BE_haute()*Filiere.LA_FILIERE.getParametre("CAC'AO40Prix Entretien Arbre").getValeur()*1.1 
-					+ this.getParc(j).getNombre_non_BE_moyenne()*Filiere.LA_FILIERE.getParametre("CAC'AO40Prix Entretien Arbre").getValeur()
-					+ this.getParc(j).getNombre_BE_moyenne()*Filiere.LA_FILIERE.getParametre("CAC'AO40Prix Entretien Arbre").getValeur()*1.1 
-					+ this.getParc(j).getNombre_non_BE_basse()*Filiere.LA_FILIERE.getParametre("CAC'AO40Prix Entretien Arbre").getValeur()*0.9 ;
+					+ (this.getParc(j).getNombre_BE_haute()-this.getParc(j).getNombre_PAS_CONTENT_BE_haute())*Filiere.LA_FILIERE.getParametre("CAC'AO40Prix Entretien Arbre").getValeur()*1.2
+					+ (this.getParc(j).getNombre_PAS_CONTENT_BE_haute())*Filiere.LA_FILIERE.getParametre("CAC'AO40Prix Entretien Arbre").getValeur()*2
+					+ (this.getParc(j).getNombre_non_BE_haute()-this.getParc(j).getNombre_PAS_CONTENT_nBE_haute())*Filiere.LA_FILIERE.getParametre("CAC'AO40Prix Entretien Arbre").getValeur()*1.1
+					+ (this.getParc(j).getNombre_PAS_CONTENT_BE_haute())*Filiere.LA_FILIERE.getParametre("CAC'AO40Prix Entretien Arbre").getValeur()*1.1*2
+					+ (this.getParc(j).getNombre_non_BE_moyenne()-this.getParc(j).getNombre_PAS_CONTENT_nBE_moyenne())*Filiere.LA_FILIERE.getParametre("CAC'AO40Prix Entretien Arbre").getValeur()
+					+ (this.getParc(j).getNombre_PAS_CONTENT_nBE_moyenne())*Filiere.LA_FILIERE.getParametre("CAC'AO40Prix Entretien Arbre").getValeur()*2
+					+ (this.getParc(j).getNombre_BE_moyenne()-this.getParc(j).getNombre_PAS_CONTENT_BE_moyenne())*Filiere.LA_FILIERE.getParametre("CAC'AO40Prix Entretien Arbre").getValeur()*1.1 
+					+ (this.getParc(j).getNombre_PAS_CONTENT_BE_moyenne())*Filiere.LA_FILIERE.getParametre("CAC'AO40Prix Entretien Arbre").getValeur()*1.1*2
+					+ (this.getParc(j).getNombre_non_BE_basse()-this.getParc(j).getNombre_PAS_CONTENT_nBE_basse())*Filiere.LA_FILIERE.getParametre("CAC'AO40Prix Entretien Arbre").getValeur()*0.9
+					+ (this.getParc(j).getNombre_PAS_CONTENT_nBE_basse())*Filiere.LA_FILIERE.getParametre("CAC'AO40Prix Entretien Arbre").getValeur()*0.9*2;
 		}
 		
 		

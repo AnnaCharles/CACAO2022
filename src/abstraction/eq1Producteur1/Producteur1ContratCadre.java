@@ -49,7 +49,7 @@ public class Producteur1ContratCadre extends Producteur1Transfo implements IVend
 		return false;
 	}
 
-	@Override
+	//@Override
 	//Auteur : Khéo
 	public Echeancier contrePropositionDuVendeur(ExemplaireContratCadre contrat) {
 		this.getContratCadre().ajouter("============================================");
@@ -59,11 +59,14 @@ public class Producteur1ContratCadre extends Producteur1Transfo implements IVend
 		
 		
 		if(contrat.getProduit() instanceof Feve) {
-		if (contrat.getEcheancier().getQuantiteTotale()<this.getStock((Feve)contrat.getProduit(), false)) {
-			if (contrat.getEcheancier().getQuantiteTotale()<100000) {
+		if (contrat.getEcheancier().getQuantiteTotale()<0.75*this.getStock((Feve)contrat.getProduit(), false)) {
+			if (contrat.getEcheancier().getQuantiteTotale()<0.25*this.getStock((Feve)contrat.getProduit(), false)) {
 				Echeancier newcontrat = contrat.getEcheancier();
-				newcontrat.ajouter(100000-newcontrat.getQuantiteTotale());
-				this.getContratCadre().ajouter("On ajoute une quantité pour un nouveau contrat");
+				double quantite =  0.25*this.getStock((Feve)contrat.getProduit(), false)/newcontrat.getNbEcheances();
+				for (int date=newcontrat.getStepDebut();date<newcontrat.getStepFin(); date++) {
+					newcontrat.set(date,quantite);
+				}
+				this.getContratCadre().ajouter("On augmente les quantités à 25%");
 				this.getContratCadre().ajouter("Nouvel échéancier " + newcontrat.toString());
 				return newcontrat;
 			} else { //Quantité demandé acceptable
@@ -72,19 +75,29 @@ public class Producteur1ContratCadre extends Producteur1Transfo implements IVend
 				return contrat.getEcheancier(); 
 			}
 			
-		} else { //Pas assez de quantité dans le stock présent
+		} else { //Pas assez de quantité dans le stock présent, on propose 35% de notre stock
 			this.getContratCadre().ajouter("Pas assez de quantité dans le stock présent de " + contrat.getProduit().toString());
-			return null;
+			Echeancier newcontrat = contrat.getEcheancier();
+			double quantite =  0.35*this.getStock((Feve)contrat.getProduit(), false)/newcontrat.getNbEcheances();
+			
+			for (int date=newcontrat.getStepDebut();date<=newcontrat.getStepFin(); date++) {
+				newcontrat.set(date,quantite);
+			}
+			this.getContratCadre().ajouter("On propose 35% de notre stock " + newcontrat.toString());
+			return newcontrat;
 		}
 	}
 		
 		if(contrat.getProduit() instanceof Chocolat) {
-			if (contrat.getEcheancier().getQuantiteTotale()<this.getStock((Chocolat)contrat.getProduit())) {
-				if (contrat.getEcheancier().getQuantiteTotale()<1000) {
+			if (contrat.getEcheancier().getQuantiteTotale()<0.75*this.getStock((Chocolat)contrat.getProduit())) {
+				if (contrat.getEcheancier().getQuantiteTotale()<0.25*this.getStock((Chocolat)contrat.getProduit())) {
 					Echeancier newcontrat = contrat.getEcheancier();
-					newcontrat.ajouter(1000-newcontrat.getQuantiteTotale());
-					this.getContratCadre().ajouter("On ajoute une quantité pour un nouveau contrat");
-					this.getContratCadre().ajouter("Nouvelle échéancier " + newcontrat.toString());
+					double quantite =  0.25*this.getStock((Chocolat)contrat.getProduit())/newcontrat.getNbEcheances();
+					for (int date=newcontrat.getStepDebut();date<newcontrat.getStepFin(); date++) {
+						newcontrat.set(date,quantite);
+					}
+					this.getContratCadre().ajouter("On réajuste les quantités à 25%");
+					this.getContratCadre().ajouter("Nouvel échéancier " + newcontrat.toString());
 					return newcontrat;
 				} else { //Quantité demandé acceptable
 					this.getContratCadre().ajouter("Quantité demandé acceptable");
@@ -94,13 +107,18 @@ public class Producteur1ContratCadre extends Producteur1Transfo implements IVend
 				
 			} else { //Pas assez de quantité dans le stock présent
 				this.getContratCadre().ajouter("Pas assez de quantité dans le stock présent de " + contrat.getProduit().toString());
-				return null;
+				Echeancier newcontrat = contrat.getEcheancier();
+				double quantite =  0.7*this.getStock((Chocolat)contrat.getProduit())/newcontrat.getNbEcheances();
+				
+				for (int date=newcontrat.getStepDebut();date<newcontrat.getStepFin(); date++) {
+					newcontrat.set(date,quantite);
+				}
+				this.getContratCadre().ajouter("On propose 70% de notre stock " + newcontrat.toString());
+				return newcontrat;
 			}
-
-			}
-		
+		}
 		this.getContratCadre().ajouter("On ne propose pas ce produit");
-
+		
 		return null;
 	}
 
@@ -110,8 +128,8 @@ public class Producteur1ContratCadre extends Producteur1Transfo implements IVend
 		//FEVE
 		if(contrat.getProduit() instanceof Feve) {
 		if (this.getPrixmoyenFeve().keySet().contains(contrat.getProduit())) {
-			this.getContratCadre().ajouter("Prix proposé " + this.getPrixmoyenFeve().get(contrat.getProduit())/Filiere.LA_FILIERE.getEtape() );
-			return this.getPrixmoyenFeve().get(contrat.getProduit())/Filiere.LA_FILIERE.getEtape();
+			this.getContratCadre().ajouter("Prix proposé " + 1.5*this.getPrixmoyenFeve().get(contrat.getProduit())/Filiere.LA_FILIERE.getEtape() );
+			return 1.5*this.getPrixmoyenFeve().get(contrat.getProduit())/Filiere.LA_FILIERE.getEtape();
 		} else {
 			return 0.0;
 		}
@@ -123,8 +141,8 @@ public class Producteur1ContratCadre extends Producteur1Transfo implements IVend
 		if(contrat.getProduit() instanceof Chocolat) {
 			
 			if (this.getPrixmoyenFeve().keySet().contains(this.getFev((Chocolat)contrat.getProduit()))) {
-				this.getContratCadre().ajouter("Prix proposé " +3*this.getPrixmoyenFeve().get(this.getFev((Chocolat)contrat.getProduit()))/Filiere.LA_FILIERE.getEtape() );
-				return this.getPrixmoyenFeve().get(this.getFev((Chocolat)contrat.getProduit()))/Filiere.LA_FILIERE.getEtape();
+				this.getContratCadre().ajouter("Prix proposé " + 3*this.getPrixmoyenFeve().get(this.getFev((Chocolat)contrat.getProduit()))/Filiere.LA_FILIERE.getEtape() );
+				return 3*this.getPrixmoyenFeve().get(this.getFev((Chocolat)contrat.getProduit()))/Filiere.LA_FILIERE.getEtape();
 			} else {
 				return 0.0;
 			}
@@ -132,41 +150,6 @@ public class Producteur1ContratCadre extends Producteur1Transfo implements IVend
 		
 		return 0.0;
 		
-	}
-
-	@Override
-	//Auteur : Khéo
-	public double contrePropositionPrixVendeur(ExemplaireContratCadre contrat) {
-		//FEVE
-		if (contrat.getProduit() instanceof Feve) {
-		double prixmoyen = this.getPrixmoyenFeve().get(contrat.getProduit())/Filiere.LA_FILIERE.getEtape();
-		
-		this.getContratCadre().ajouter("Prix moyen " + prixmoyen);
-		if(contrat.getPrix()<prixmoyen*0.75) {
-			this.getContratCadre().ajouter("Prix qui passe pas " + contrat.getPrix().toString());
-			this.getContratCadre().ajouter("Notre prix " + prixmoyen*0.75 );
-			return prixmoyen*0.75;	
-		}
-		this.getContratCadre().ajouter("Prix qui passe " + contrat.getPrix().toString());
-		return contrat.getPrix();
-		}
-		
-		
-		
-		//CHOCOLAT
-		if (contrat.getProduit() instanceof Chocolat) {
-			double prixmoyen = this.getPrixmoyenFeve().get(contrat.getProduit())/Filiere.LA_FILIERE.getEtape();
-			if(contrat.getPrix()<prixmoyen*0.75) {
-				this.getContratCadre().ajouter("Prix qui passe pas " + contrat.getPrix().toString());
-				this.getContratCadre().ajouter("Notre prix " + prixmoyen*0.75 );
-				return prixmoyen*0.75;	
-			}
-			this.getContratCadre().ajouter("Prix qui passe " + contrat.getPrix().toString());
-			return contrat.getPrix();
-		}
-		
-		return 0.0;
-	
 	}
 	
 
@@ -179,7 +162,7 @@ public class Producteur1ContratCadre extends Producteur1Transfo implements IVend
 
 
 	@Override
-	//Copié sur le code de l'équipe 8 on veut livrer le plus possible dans tout les cas 
+	//Copié sur le code de l'équipe 8 on veut livrer le plus possible dans tous les cas 
 	public double livrer(Object produit, double quantite, ExemplaireContratCadre contrat) {
 		//FEVE 
 		if (contrat.getProduit() instanceof Feve) {
@@ -251,59 +234,92 @@ public class Producteur1ContratCadre extends Producteur1Transfo implements IVend
 	 * @param contrat
 	 * @return Echeancier
 	 */
-	public Echeancier contrePropositionDuVendeur2(ExemplaireContratCadre contrat) {
+	/*public Echeancier contrePropositionDuVendeur(ExemplaireContratCadre contrat) {
 		this.getContratCadre().ajouter("============================================");
 		this.getContratCadre().ajouter("L'acheteur est " + contrat.getAcheteur().toString() + " pour du " + contrat.getProduit().toString());
 		this.getContratCadre().ajouter("Premier échéancier " + contrat.getEcheancier());
 		//FEVE
 		if(contrat.getProduit() instanceof Feve) {
-			if (((Feve)contrat.getProduit()).getGamme()==Feve.FEVE_BASSE.getGamme()){
-				System.out.println("fève basse qualité");
-				if (contrat.getEcheancier().getQuantite(0)<0) {
-					return null;
-				}
-				for (int date=contrat.getEcheancier().getStepDebut();date<contrat.getEcheancier().getStepFin(); date++) {
-					if (contrat.getEcheancier().getQuantite(date)<0.75*this.getStock(Feve.FEVE_BASSE, false)) {
-						System.out.println(contrat.getEcheanciers().toString());
-						//if (contrat.getEcheancier().getQuantite(date)>0.2*this.getStock(Feve.FEVE_BASSE, false)) {
-							if(contrat.getEcheanciers().size()==1) { //1ere contreproposition
-								contrat.getEcheancier().set(date, 0.6*this.getStockBasse().getValeur());
-								
-								System.out.println("premiere proposition : ut n°"+date+"quantité"+0.6*this.getStockBasse().getValeur());
-							} else {
-								System.out.println("proposition suivante : ut n° "+date+", quantité : "+0.6*this.getStockBasse().getValeur());
-								contrat.getEcheancier().set(date, (contrat.getEcheancier().getQuantite(date)+contrat.getEcheanciers().get(contrat.getEcheanciers().size()-2).getQuantite(date)/2));
-							}
-						//} else {
-							//this.getContratCadre().ajouter("On nous propose trop peu de quantité, on ne vend pas");
-							//return null;
-						//}
-					} else {
-						this.getContratCadre().ajouter("On n'a pas assez de stock, on ne vend pas");
-						return null;
+			if (contrat.getEcheancier().getQuantite(0)<0) {
+				return null;
+			}
+			int test=1;
+			if (contrat.getEcheancier().getQuantiteTotale()<0.75*this.getStock((Feve)contrat.getProduit(),false)) {
+				if (contrat.getEcheancier().getQuantiteTotale()>0.2*this.getStock((Feve)contrat.getProduit(), false)) {
+					for (int date=contrat.getEcheancier().getStepDebut();date<contrat.getEcheancier().getStepFin(); date++) {
+						if(contrat.getEcheanciers().size()==1) { //1ere contreproposition
+							contrat.getEcheancier().set(date, 0.6*this.getStockBasse().getValeur());
+							this.getContratCadre().ajouter("type de fève : "+ contrat.getProduit().toString() +" : Première proposition : ut n° "+date+", quantité : "+0.6*this.getStockBasse().getValeur());
+						} else { // propositions suivantes
+							// Je ne peux pas tester, l'acheteur accepte tout
+							contrat.getEcheancier().set(date, (contrat.getEcheancier().getQuantite(date)+contrat.getEcheanciers().get(contrat.getEcheanciers().size()-2).getQuantite(date)/2));
+							this.getContratCadre().ajouter("type de fève : "+ contrat.getProduit().toString() +" : Proposition suivante : ut n° "+date+", quantité : "+0.6*this.getStockBasse().getValeur());
+						}
 					}
+				} else {
+					this.getContratCadre().ajouter("On nous propose trop peu de quantité, on ne vend pas");
+					test=0;
 				}
-				this.getContratCadre().ajouter("On ajoute une quantité pour un nouveau contrat");
-				this.getContratCadre().ajouter("Nouvel échéancier " + contrat.getEcheancier());
-				return contrat.getEcheancier();
 			} else {
-				if (contrat.getEcheancier().getQuantiteTotale()<this.getStock((Feve)contrat.getProduit(), false)) {
-					if (contrat.getEcheancier().getQuantiteTotale()<100000) {
-						Echeancier newcontrat = contrat.getEcheancier();
-						newcontrat.ajouter(100000-newcontrat.getQuantiteTotale());
-						this.getContratCadre().ajouter("On ajoute une quantité pour un nouveau contrat");
-						this.getContratCadre().ajouter("Nouvel échéancier " + newcontrat.toString());
-						return newcontrat;
-					} else { //Quantité demandé acceptable
-						this.getContratCadre().ajouter("Quantité demandée acceptable");
-						this.getContratCadre().ajouter(contrat.getEcheancier().toString());
-						return contrat.getEcheancier(); 
-					}	
-				} else { //Pas assez de quantité dans le stock présent
-					return null;
-				}
+				this.getContratCadre().ajouter("On n'a pas assez de stock, on ne vend pas");
+				test=0;
+			}
+			if (test==0) {
+				return null;
+
+			}
+			this.getContratCadre().ajouter("On ajoute une quantité pour un nouveau contrat");
+			this.getContratCadre().ajouter("Nouvel échéancier " + contrat.getEcheancier());
+			return contrat.getEcheancier();
+		}
+		
+		return null;
+	}*/
+	
+	
+
+	
+	
+	@Override
+	/**
+	 * @author laure
+	 * @param contrat
+	 * @return prix contrat 
+	 */
+	public double contrePropositionPrixVendeur(ExemplaireContratCadre contrat) {
+		//FEVE
+		if (contrat.getProduit() instanceof Feve) {
+		double prixmoyen = this.getPrixmoyenFeve().get(contrat.getProduit())/Filiere.LA_FILIERE.getEtape();
+		
+		this.getContratCadre().ajouter("Prix moyen " + prixmoyen);
+		if(contrat.getPrix()<prixmoyen*1.3) {
+			this.getContratCadre().ajouter("Prix qui passe pas " + contrat.getPrix().toString());
+			this.getContratCadre().ajouter("Notre prix " + prixmoyen*0.75 );
+			return prixmoyen;	
+		} else if (contrat.getPrix()<prixmoyen*0.75) {
+			this.getContratCadre().ajouter("Prix proposé 75% du prix moyen" + prixmoyen*0.75);
+			return prixmoyen*0.75;
+		}
+		this.getContratCadre().ajouter("Prix qui passe " + contrat.getPrix().toString());
+		return contrat.getPrix();
+		}
+		
+		
+		
+		//CHOCOLAT
+		if (contrat.getProduit() instanceof Chocolat) {
+			double prixmoyen = this.getPrixmoyenFeve().get(getFev((Chocolat)contrat.getProduit()))/Filiere.LA_FILIERE.getEtape();
+			if(contrat.getPrix()<prixmoyen*0.75) {
+				this.getContratCadre().ajouter("Prix qui passe pas " + contrat.getPrix().toString());
+				this.getContratCadre().ajouter("Notre prix " + prixmoyen*0.75);
+				return prixmoyen*0.75;	
+			} else {
+			this.getContratCadre().ajouter("Prix qui passe " + contrat.getPrix().toString());
+			return contrat.getPrix();
 			}
 		}
-		return null;
+		
+		return 0.0;
+	
 	}
 }

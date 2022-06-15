@@ -71,7 +71,7 @@ public class CtrlJTextField  implements ActionListener, PropertyChangeListener {
     
 	public void actionPerformed(ActionEvent e) {
 		NumberFormat dc = NumberFormat.getInstance(Locale.FRANCE);
-		dc.setMaximumFractionDigits(2);
+		dc.setMaximumFractionDigits(4);
 		dc.setGroupingUsed(true);
 		double saisie =0;
 		try {
@@ -93,8 +93,8 @@ public class CtrlJTextField  implements ActionListener, PropertyChangeListener {
 
 	public void propertyChange(PropertyChangeEvent evt) {
 		NumberFormat dc = NumberFormat.getInstance(Locale.FRANCE);
-		dc.setMaximumFractionDigits(2);
-		dc.setMinimumFractionDigits(2);
+		dc.setMaximumFractionDigits(4);
+		dc.setMinimumFractionDigits(4);
 		dc.setGroupingUsed(true);
 		String formattedText = dc.format(ind.getValeur());
 		this.field.setText(formattedText);

@@ -27,11 +27,11 @@ public abstract class Transformateur2Acteur implements IActeur,IMarqueChocolat, 
 	
 	
 	
-	protected Variable prixSeuilMQ; // au dela duquel nous n'achetons pas
-	protected Variable prixSeuilHQ;
-	protected Variable prixSeuilBQ;
-	protected Variable prixSeuilMQBE;
-	protected Variable prixSeuilHQBE;
+//	protected Variable prixSeuilMQ; // au dela duquel nous n'achetons pas
+//	protected Variable prixSeuilHQ;
+//	protected Variable prixSeuilBQ;
+//	protected Variable prixSeuilMQBE;
+//	protected Variable prixSeuilHQBE;
 	//private Variable capaciteStockageFixe;// stock que l'on souhaite en permanence
 	protected Variable prixMinB;
 	protected Variable prixMinM;
@@ -40,11 +40,13 @@ public abstract class Transformateur2Acteur implements IActeur,IMarqueChocolat, 
 	protected Variable prixMinHb;
 	private Stock<Feve> stockReferenceFeve; //Le stock referent de feve, celui vers lequel on essaye de retourner à chaque etape
 	private Stock<ChocolatDeMarque> stockReferenceChocolat;//Idem pour choco
-	protected double marge;
+	protected double margeAO;
+	protected double margeCC;
 	
 	protected SuperviseurVentesAO superviseur;
 	protected int cryptogramme;
 	protected double NewCap;//à réinitialiser=cpacité de production au début de chaque tour
+	private int comptFaillite;
 	
 
 
@@ -56,18 +58,20 @@ public abstract class Transformateur2Acteur implements IActeur,IMarqueChocolat, 
 	//Nawfel
 	public Transformateur2Acteur() {
 	
-		this.prixSeuilBQ = new Variable("prix seuil basse qualité", "<html>Prix Seuil Basse Qualité</html>",this, 0.0, 10000000, 10);
-		this.prixSeuilMQ = new Variable("prix seuil moyenne qualité", "<html>Prix Seuil Moyenne Qualité</html>",this, 0.0, 10000000, 10);
-		this.prixSeuilMQBE = new Variable("prix seuil moyenne qualité bio", "<html>Prix Seuil Moyenne Qualité BIO</html>",this, 0.0, 10000000, 10);
-		this.prixSeuilHQ = new Variable("prix seuil haute qualité", "<html>Prix Seuil Haute Qualité</html>",this, 0.0, 10000000, 10);
-		this.prixSeuilHQBE = new Variable("prix seuil haute qualité bio", "<html>Prix Seuil Haute Qualité BIO</html>",this, 0.0, 10000000, 10);
+//		this.prixSeuilBQ = new Variable("prix seuil basse qualité", "<html>Prix Seuil Basse Qualité</html>",this, 0.0, 10000000, 10);
+//		this.prixSeuilMQ = new Variable("prix seuil moyenne qualité", "<html>Prix Seuil Moyenne Qualité</html>",this, 0.0, 10000000, 10);
+//		this.prixSeuilMQBE = new Variable("prix seuil moyenne qualité bio", "<html>Prix Seuil Moyenne Qualité BIO</html>",this, 0.0, 10000000, 10);
+//		this.prixSeuilHQ = new Variable("prix seuil haute qualité", "<html>Prix Seuil Haute Qualité</html>",this, 0.0, 10000000, 10);
+//		this.prixSeuilHQBE = new Variable("prix seuil haute qualité bio", "<html>Prix Seuil Haute Qualité BIO</html>",this, 0.0, 10000000, 10);
 		this.prixMinB = new Variable("prix seuil basse qualité", "<html>Prix Seuil Basse Qualité</html>",this, 0.0, 10000000, 4);
 		this.prixMinM = new Variable("prix seuil moyenne qualité", "<html>Prix Seuil Basse Qualité</html>",this, 0.0, 10000000, 5);
 		this.prixMinMb = new Variable("prix seuil moyenne qualité bio", "<html>Prix Seuil Basse Qualité</html>",this, 0.0, 10000000, 4);
 		this.prixMinH = new Variable("prix seuil haute qualité", "<html>Prix Seuil Basse Qualité</html>",this, 0.0, 10000000, 5);
 		this.prixMinHb = new Variable("prix seuil haute qualité bio", "<html>Prix Seuil Basse Qualité</html>",this, 0.0, 10000000, 5);
 		//this.capaciteStockageFixe=new Variable("stock theorique desire", "<html>Stock Theorique désiré en permanence</html>",this, 0.0, 1000000.0, 8000);
-		this.marge = 1.2;
+		this.margeAO = 1.5;
+		this.margeCC=1.30;
+		this.comptFaillite=0;
 		//On crée notre stock referent, qui servira juste de guide pour savoir combien acheter/transformer à chaque tour.
 		this.stockReferenceFeve=new Stock();
 		this.stockReferenceFeve.ajouter(Feve.FEVE_BASSE, 20000000);
@@ -98,76 +102,76 @@ public abstract class Transformateur2Acteur implements IActeur,IMarqueChocolat, 
 
 	}
 	
-	//Jad
-	//renvoie le prix seuil de chaque feves
-	public Variable getPrixSeuil(Feve f) {
-		if(f.equals(Feve.FEVE_BASSE)) {
-			return this.getPrixSeuilBQ();
-		}
-		else if(f.equals(Feve.FEVE_HAUTE)) {
-			return this.getPrixSeuilHQ();
-		}
-		else if(f.equals(Feve.FEVE_HAUTE_BIO_EQUITABLE)) {
-			return this.getPrixSeuilHQBE();
-		}
-		else if (f.equals(Feve.FEVE_MOYENNE)) {
-			return this.getPrixSeuilMQ();
-		}
-		else if (f.equals(Feve.FEVE_MOYENNE_BIO_EQUITABLE)) {
-			return this.getPrixSeuilMQBE();
-					
-		}
-		return null;
-	}
+// Jad
+// Renvoie le prix seuil de chaque feves
+//	public Variable getPrixSeuil(Feve f) {
+//		if(f.equals(Feve.FEVE_BASSE)) {
+//			return this.getPrixSeuilBQ();
+//		}
+//		else if(f.equals(Feve.FEVE_HAUTE)) {
+//			return this.getPrixSeuilHQ();
+//		}
+//		else if(f.equals(Feve.FEVE_HAUTE_BIO_EQUITABLE)) {
+//			return this.getPrixSeuilHQBE();
+//		}
+//		else if (f.equals(Feve.FEVE_MOYENNE)) {
+//			return this.getPrixSeuilMQ();
+//		}
+//		else if (f.equals(Feve.FEVE_MOYENNE_BIO_EQUITABLE)) {
+//			return this.getPrixSeuilMQBE();
+//					
+//		}
+//		return null;
+//	}
 
-	public Variable getPrixSeuilMQ() {
-		return prixSeuilMQ;
-	}
-
-
-	public void setPrixSeuilMQ(Variable prixSeuilMQ) {
-		this.prixSeuilMQ = prixSeuilMQ;
-	}
-
-
-	public Variable getPrixSeuilHQ() {
-		return prixSeuilHQ;
-	}
-
-
-	public void setPrixSeuilHQ(Variable prixSeuilHQ) {
-		this.prixSeuilHQ = prixSeuilHQ;
-	}
-
-
-	public Variable getPrixSeuilBQ() {
-		return prixSeuilBQ;
-	}
-
-
-	public void setPrixSeuilBQ(Variable prixSeuilBQ) {
-		this.prixSeuilBQ = prixSeuilBQ;
-	}
-
-
-	public Variable getPrixSeuilMQBE() {
-		return prixSeuilMQBE;
-	}
-
-
-	public void setPrixSeuilMQBE(Variable prixSeuilMQBE) {
-		this.prixSeuilMQBE = prixSeuilMQBE;
-	}
-
-
-	public Variable getPrixSeuilHQBE() {
-		return prixSeuilHQBE;
-	}
-
-
-	public void setPrixSeuilHQBE(Variable prixSeuilHQBE) {
-		this.prixSeuilHQBE = prixSeuilHQBE;
-	}
+//	public Variable getPrixSeuilMQ() {
+//		return prixSeuilMQ;
+//	}
+//
+//
+//	public void setPrixSeuilMQ(Variable prixSeuilMQ) {
+//		this.prixSeuilMQ = prixSeuilMQ;
+//	}
+//
+//
+//	public Variable getPrixSeuilHQ() {
+//		return prixSeuilHQ;
+//	}
+//
+//
+//	public void setPrixSeuilHQ(Variable prixSeuilHQ) {
+//		this.prixSeuilHQ = prixSeuilHQ;
+//	}
+//
+//
+//	public Variable getPrixSeuilBQ() {
+//		return prixSeuilBQ;
+//	}
+//
+//
+//	public void setPrixSeuilBQ(Variable prixSeuilBQ) {
+//		this.prixSeuilBQ = prixSeuilBQ;
+//	}
+//
+//
+//	public Variable getPrixSeuilMQBE() {
+//		return prixSeuilMQBE;
+//	}
+//
+//
+//	public void setPrixSeuilMQBE(Variable prixSeuilMQBE) {
+//		this.prixSeuilMQBE = prixSeuilMQBE;
+//	}
+//
+//
+//	public Variable getPrixSeuilHQBE() {
+//		return prixSeuilHQBE;
+//	}
+//
+//
+//	public void setPrixSeuilHQBE(Variable prixSeuilHQBE) {
+//		this.prixSeuilHQBE = prixSeuilHQBE;
+//	}
 
 
 	public void initialiser() {
@@ -193,7 +197,33 @@ public abstract class Transformateur2Acteur implements IActeur,IMarqueChocolat, 
 	}
 	
 	public void next() {
+		List<String> res = new ArrayList<String>();
+		for (IActeur test : Filiere.LA_FILIERE.getActeursSolvables()) {
+			res.add(test.getNom());
+		}
+		
+		if (res.contains("BioFour")) {
 			
+		}
+		else {
+			this.stockReferenceFeve.enlever(Feve.FEVE_HAUTE, this.stockReferenceFeve.getQuantite(Feve.FEVE_HAUTE)*0.5);
+		}
+		if (res.contains("EQ3") && res.contains("EQ5")) {
+			
+		}
+		else {
+			if(this.comptFaillite<1) {
+				this.comptFaillite = 1;
+				List<Feve> fevesCibles = new ArrayList<Feve>();
+				fevesCibles.add(Feve.FEVE_HAUTE_BIO_EQUITABLE);
+				fevesCibles.add(Feve.FEVE_MOYENNE_BIO_EQUITABLE);
+				for(Feve f : fevesCibles) {
+					System.out.println(this.stockReferenceFeve.getQuantite(f));
+					this.stockReferenceFeve.ajouter(f, this.stockReferenceFeve.getQuantite(f)*0.2);
+					System.out.println(this.stockReferenceFeve.getQuantite(f));
+				}
+			}
+		}
 	}
 	
 	
@@ -260,7 +290,7 @@ public abstract class Transformateur2Acteur implements IActeur,IMarqueChocolat, 
 
 
 	public double getMarge() {
-		return this.marge;
+		return this.margeAO;
 	}
 
 
@@ -313,6 +343,10 @@ public abstract class Transformateur2Acteur implements IActeur,IMarqueChocolat, 
 
 	public Stock<ChocolatDeMarque> getStockReferenceChocolat() {
 		return stockReferenceChocolat;
+	}
+
+	public double getMargeCC() {
+		return margeCC;
 	}
 
 }

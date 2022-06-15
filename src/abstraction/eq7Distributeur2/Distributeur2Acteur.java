@@ -8,6 +8,7 @@ import java.util.List;
 import abstraction.eq7Distributeur2.examples.FiliereTestCCBiofour;
 import abstraction.eq7Distributeur2.tools.IStock;
 import abstraction.eq7Distributeur2.tools.Stock;
+import abstraction.eq7Distributeur2.tools.Tracker;
 import abstraction.eq8Romu.filiere.Filiere;
 import abstraction.eq8Romu.filiere.IActeur;
 import abstraction.eq8Romu.general.Journal;
@@ -22,6 +23,9 @@ public class Distributeur2Acteur implements IActeur{
 	
 	//Stock
 	protected IStock stock;
+	
+	//Tracker
+	protected Tracker venteTracker;
 	
 	//Liste des chocolats sur le marché
 	protected List<ChocolatDeMarque> chocolats;
@@ -73,6 +77,27 @@ public class Distributeur2Acteur implements IActeur{
 	public Color getColorFaillure() {
 		return new Color(255,0,0); 
 	}
+	
+	public Color getColorYellow() {
+		return new Color(240,230,140); 
+	}
+	
+	public String getColoredName(IActeur v) {
+		if (v == this) {return Journal.texteColore(getColor(), getColorYellow(), v.getNom());}
+		return Journal.texteColore(v, v.getNom());
+	}
+	
+	public String yellow(String s) {
+		return Journal.texteColore(getColorYellow(), Color.BLACK,s);
+	}
+	
+	public String red(String s) {
+		return Journal.texteColore(getColorFaillure(), Color.BLACK,s);
+	}
+	
+	public String green(String s) {
+		return Journal.texteColore(getColorSuccess(), Color.BLACK,s);
+	}
 
 
 	public void initialiser() {
@@ -80,6 +105,7 @@ public class Distributeur2Acteur implements IActeur{
 		this.chocolats = Filiere.LA_FILIERE.getChocolatsProduits();
 		System.out.println("Liste des chocolats en vente sur le marché : "+chocolats);
 		this.stock = new Stock(this,this.chocolats);
+		this.venteTracker = new Tracker(chocolats);
 		this.actualiserIndicateurs();
 		this.journalStock.ajouter("Stock initial: "+this.stock.getQuantiteTotale());
 		

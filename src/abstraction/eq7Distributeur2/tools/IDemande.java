@@ -2,7 +2,6 @@ package abstraction.eq7Distributeur2.tools;
 
 import java.util.List;
 
-import abstraction.eq8Romu.general.Variable;
 import abstraction.eq8Romu.produits.ChocolatDeMarque;
 
 public interface IDemande {

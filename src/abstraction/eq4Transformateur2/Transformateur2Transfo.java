@@ -43,14 +43,18 @@ public abstract class Transformateur2Transfo<I> extends Transformateur2Stock {
 		}
 		
 		
-		this.commandes_step= new Stock<ChocolatDeMarque>();
+		//this.commandes_step= new Stock<ChocolatDeMarque>();
+		//this.commandes=new Stock<ChocolatDeMarque>();
 		super.next();
 		NewCap=cap;
+		
 		this.commandes=this.GetCommandes(mesContratEnTantQueVendeur);
 		this.commandes_step=this.GetCommandes(mesContratEnTantQueVendeur);
+		
 		//il faut régler les qauntités transformées pour chaque types de fèves
 		
 		//Les transformations non originales courtes
+		
 		this.transfo(this.bestCombi("CBQ")*cap, false, "courte",Feve.FEVE_BASSE);
 		this.transfo(this.bestCombi("CMQ")*cap,false,"courte",Feve.FEVE_MOYENNE);
 		this.transfo(this.bestCombi("CMQBE")*cap,false,"courte",Feve.FEVE_MOYENNE_BIO_EQUITABLE);
@@ -96,9 +100,9 @@ public abstract class Transformateur2Transfo<I> extends Transformateur2Stock {
 		
 	}
 
-	//renvoie une HashMap des chocolats de marques et de la quatité à livrer de ces derniers 
+	//renvoie une HashMap des chocolats de marques et de la quantité à livrer de ces derniers 
 	public Stock<ChocolatDeMarque> GetCommandes(List<ExemplaireContratCadre> CC) {///POUR LA V2
-		Stock comm=new Stock<ChocolatDeMarque>();
+		Stock<ChocolatDeMarque> comm=new Stock<ChocolatDeMarque>();
 		for(ExemplaireContratCadre c:CC) {
 			if( c.getQuantiteALivrerAuStep()>0) {
 			

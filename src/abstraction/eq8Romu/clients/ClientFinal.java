@@ -45,7 +45,7 @@ public class ClientFinal implements IActeur, IAssermente {
 
 	private Map<ChocolatDeMarque, Double> attractiviteChocolat;// Plus un chocolat a une forte attractivite (compare aux autres chocolats), plus ce chocolat aura une place importante dans la consommation globale de chocolat
 	private Map<ChocolatDeMarque, Map<IDistributeurChocolatDeMarque, Double>> attractiviteDistributeur;// Pour un chocolat donne, plus l'attractivite d'un distributeur est grande (comparee a celle des autres distributeurs) plus sa part de marche sur ce chocolat sera grande
-	private Variable deltaConsoMin, deltaConsoMax, conso, surcoutMemeQualite, surcoutQualitesDifferentes;
+	private Variable deltaConsoMin, deltaConsoMax, conso, surcoutMemeQualite, surcoutQualitesDifferentes, gainAttractiviteMemeQualite, gainAttractiviteQualiteDifferente;
 	protected HashMap<Chocolat, Double> repartitionInitiale; 
 	protected HashMap<ChocolatDeMarque, Double> repartitionIntentionsAchat; // Associe a chaque chocolat de marque son pourcentage vis a vis des intentions globales d'achat de chocolat 
 	protected Integer cryptogramme;
@@ -86,6 +86,8 @@ public class ClientFinal implements IActeur, IAssermente {
 		this.journalPrix = new Journal(this.getNom()+" prix", this);
 		this.surcoutMemeQualite = new Variable(getNom()+" surcout meme qualite", null, this, 0.25);
 		this.surcoutQualitesDifferentes = new Variable(getNom()+" surcout qualites differentes", null, this, 1.25);
+		this.gainAttractiviteMemeQualite = new Variable(getNom()+" gain attractivite meme qualite", null, this, 0.005); 
+		this.gainAttractiviteQualiteDifferente = new Variable(getNom()+" gain attractivite qualite differentes", null, this, 0.05);
 		this.repartitionInitiale = repartitionInitiale;
 
 	}
@@ -304,19 +306,19 @@ public class ClientFinal implements IActeur, IAssermente {
 					}
 					if (moinsCher.qualitePercue()==plusCher.qualitePercue()) {
 						if ((prixMoyen(plusCher)-prixMoyen(moinsCher))/prixMoyen(moinsCher)>this.surcoutMemeQualite.getValeur()) {// a qualite identique un ecart de prix de plus de 25% modifie l'attractivite
-							attractiviteChocolat.put(moinsCher, attractiviteChocolat.get(moinsCher)*1.005);// +0.5%						
-							attractiviteChocolat.put(plusCher, attractiviteChocolat.get(plusCher)*0.995);// -0.5%						
-							this.journalAttractivites.ajouter("&nbsp;&nbsp;prixMoyen("+moinsCher.name()+")="+Journal.doubleSur(prixMoyen(moinsCher), 4)+" et prixMoyen("+plusCher.name()+")="+Journal.doubleSur(prixMoyen(plusCher), 4)+" --> attractivite +0.5% pour le moins cher");
+							attractiviteChocolat.put(moinsCher, attractiviteChocolat.get(moinsCher)*(1+this.gainAttractiviteMemeQualite.getValeur()));//1.005);// +0.5%						
+							attractiviteChocolat.put(plusCher, attractiviteChocolat.get(plusCher)*(1-+this.gainAttractiviteMemeQualite.getValeur()));//// -0.5%						
+							this.journalAttractivites.ajouter("&nbsp;&nbsp;prixMoyen("+moinsCher.name()+")="+Journal.doubleSur(prixMoyen(moinsCher), 4)+" et prixMoyen("+plusCher.name()+")="+Journal.doubleSur(prixMoyen(plusCher), 4)+" --> attractivite +"+this.gainAttractiviteMemeQualite.getValeur()+" pour le moins cher");
 						}
 					} else if (moinsCher.qualitePercue()>plusCher.qualitePercue()) {
-						attractiviteChocolat.put(moinsCher, attractiviteChocolat.get(moinsCher)*1.05);// +5%						
-						attractiviteChocolat.put(plusCher, attractiviteChocolat.get(plusCher)*0.95);// -5%						
-						this.journalAttractivites.ajouter("&nbsp;&nbsp;prixMoyen("+moinsCher.name()+")="+Journal.doubleSur(prixMoyen(moinsCher), 4)+" et prixMoyen("+plusCher.name()+")="+Journal.doubleSur(prixMoyen(plusCher), 4)+" --> attractivite +5% pour le moins cher");
+						attractiviteChocolat.put(moinsCher, attractiviteChocolat.get(moinsCher)*(1+this.gainAttractiviteQualiteDifferente.getValeur()));//// +5%						
+						attractiviteChocolat.put(plusCher, attractiviteChocolat.get(plusCher)*(1-this.gainAttractiviteQualiteDifferente.getValeur()));//// -5%						
+						this.journalAttractivites.ajouter("&nbsp;&nbsp;prixMoyen("+moinsCher.name()+")="+Journal.doubleSur(prixMoyen(moinsCher), 4)+" et prixMoyen("+plusCher.name()+")="+Journal.doubleSur(prixMoyen(plusCher), 4)+" --> attractivite +"+this.gainAttractiviteQualiteDifferente.getValeur()+" pour le moins cher");
 					} else {
 						if ((prixMoyen(plusCher)-prixMoyen(moinsCher))/prixMoyen(moinsCher)>this.surcoutQualitesDifferentes.getValeur()*(plusCher.qualitePercue()-moinsCher.qualitePercue())) {
-							attractiviteChocolat.put(moinsCher, attractiviteChocolat.get(moinsCher)*1.005);						
-							attractiviteChocolat.put(plusCher, attractiviteChocolat.get(plusCher)*0.995);					
-							this.journalAttractivites.ajouter("&nbsp;&nbsp;prixMoyen("+moinsCher.name()+")="+Journal.doubleSur(prixMoyen(moinsCher), 4)+" et prixMoyen("+plusCher.name()+")="+Journal.doubleSur(prixMoyen(plusCher), 4)+" --> attractivite +0.5% pour le moins cher");
+							attractiviteChocolat.put(moinsCher, attractiviteChocolat.get(moinsCher)*(1+this.gainAttractiviteQualiteDifferente.getValeur()));						
+							attractiviteChocolat.put(plusCher, attractiviteChocolat.get(plusCher)*(1-this.gainAttractiviteQualiteDifferente.getValeur()));			
+							this.journalAttractivites.ajouter("&nbsp;&nbsp;prixMoyen("+moinsCher.name()+")="+Journal.doubleSur(prixMoyen(moinsCher), 4)+" et prixMoyen("+plusCher.name()+")="+Journal.doubleSur(prixMoyen(plusCher), 4)+" --> attractivite +"+this.gainAttractiviteQualiteDifferente.getValeur()+" pour le moins cher");
 						}
 					}
 				}
@@ -347,6 +349,8 @@ public class ClientFinal implements IActeur, IAssermente {
 		res.add(this.dureeMaxTransitionDistribution);
 		res.add(this.surcoutMemeQualite);
 		res.add(this.surcoutQualitesDifferentes);
+		res.add(this.gainAttractiviteMemeQualite);
+		res.add(this.gainAttractiviteQualiteDifferente);
 		return res;
 	}
 	public List<Journal> getJournaux() {

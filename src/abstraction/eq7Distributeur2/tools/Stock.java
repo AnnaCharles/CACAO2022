@@ -20,7 +20,7 @@ public class Stock implements IStock{
 	private HashMap<ChocolatDeMarque,Variable> seuilRachat;
 	private IActeur acteur;
 	private boolean FONCTIONEL;
-	private double StockInit=20E5;
+	private double StockInit=0.;
 	
 	/**Méthode constructeur, initialise le stock vide
 	 * @param acteur
@@ -42,7 +42,7 @@ public class Stock implements IStock{
 		//Initialisation des deux à 0
 		for (ChocolatDeMarque choco : listeChocolatsProduits) {
 			reserve.put(choco, new Variable("Stock"+choco.toString(),"Valeur du stock pour "+choco.toString(),acteur,0.,Double.POSITIVE_INFINITY,StockInit));
-			seuilRachat.put(choco,new Variable("SeuilRachat"+choco.toString(),"Seuil de rachat défini pour "+choco.toString(),acteur,-1.,Double.POSITIVE_INFINITY,0));
+			seuilRachat.put(choco,new Variable("SeuilRachat"+choco.toString(),"Seuil de rachat défini pour "+choco.toString(),acteur,-1.,Double.POSITIVE_INFINITY,1000));
 		}
 		this.acteur = acteur;
 		

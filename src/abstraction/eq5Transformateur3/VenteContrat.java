@@ -14,6 +14,7 @@ import abstraction.eq8Romu.filiere.IDistributeurChocolatDeMarque;
 import abstraction.eq8Romu.produits.Chocolat;
 import abstraction.eq8Romu.produits.ChocolatDeMarque;
 import abstraction.eq8Romu.produits.Feve;
+import abstraction.eq8Romu.produits.Gamme;
 
 
 public class VenteContrat extends Transformation implements IVendeurContratCadre {
@@ -23,7 +24,7 @@ public class VenteContrat extends Transformation implements IVendeurContratCadre
 	//chgmt 
 	public void lanceruncontratVendeur(ChocolatDeMarque c) {
 		List<IAcheteurContratCadre> L =  ((SuperviseurVentesContratCadre)(Filiere.LA_FILIERE.getActeur("Sup.CCadre"))).getAcheteurs(c);
-		Echeancier e = new Echeancier(Filiere.LA_FILIERE.getEtape()+1, 10, 100); //100 kg de chocolat sur 10 steps
+		Echeancier e = new Echeancier(Filiere.LA_FILIERE.getEtape()+1, 3, 1000000); //10000 kg de chocolat sur 10 steps
 		List<IAcheteurContratCadre>L2 = new LinkedList<IAcheteurContratCadre>();
 		this.nb_prop = 0;
 		for (IAcheteurContratCadre a : L) {
@@ -67,37 +68,51 @@ public class VenteContrat extends Transformation implements IVendeurContratCadre
 	public Echeancier contrePropositionDuVendeur(ExemplaireContratCadre contrat) {
 		List<Echeancier> listeEcheanciers=contrat.getEcheanciers();
 		int l = listeEcheanciers.size();
-		this.ventes.ajouter("nous acceptons l' échéancier");
+		this.ventes.ajouter("nous acceptons l' échéancier" + listeEcheanciers.get(l-1));
 		return listeEcheanciers.get(l-1); //////////
 	}
 
 	//Yves
 	public double propositionPrix(ExemplaireContratCadre contrat) {
 		this.nb_prop += 1;
+		
 		BourseCacao bourse = (BourseCacao)(Filiere.LA_FILIERE.getActeur("BourseCacao"));
-		//Double seuilMax = bourse.getCours((Feve)contrat.getProduit()).getMin();
-		Double seuilMax = 2.0;
-		this.achats.ajouter(seuilMax.toString());
+		ChocolatDeMarque c = (ChocolatDeMarque)contrat.getProduit();
+		Gamme gamme = c.getGamme();
+		boolean be = c.isBioEquitable();
+		Feve feve = null;
 
-		if (contrat.getProduit() instanceof ChocolatDeMarque) {
-			if (((ChocolatDeMarque)(contrat.getProduit())).isOriginal()) {
-				return 2*(seuilMax+this.coutTransformation.getValeur()+this.coutOriginal.getValeur());
-			}
-			else {
-				return 2*(seuilMax+this.coutTransformation.getValeur());
+		for (Feve f : this.stockFeves.getProduitsEnStock()) {
+			if (f.getGamme() == gamme && f.isBioEquitable() == be) {
+				feve = f;
 			}
 		}
-		else {
-			return 0.0;
+		
+		if (feve != null) {
+			Double seuilMax = bourse.getCours(feve).getMin();
+			//Double seuilMax = 2.0;
+			//this.achats.ajouter("seuilMax de " + feve.toString() + "vaut " + seuilMax.toString());
+
+			if (contrat.getProduit() instanceof ChocolatDeMarque) {
+				if (((ChocolatDeMarque)(contrat.getProduit())).isOriginal()) {
+					return 2*(seuilMax+this.coutTransformation.getValeur()+this.coutOriginal.getValeur());
+				}
+				else {
+					return 2*(seuilMax+this.coutTransformation.getValeur());
+				}
+			}
+							
 		}
+		return 0.0;
+
 	}
 
 	@Override
 	//Yves
 	public double contrePropositionPrixVendeur(ExemplaireContratCadre contrat) {
 		BourseCacao bourse = (BourseCacao)(Filiere.LA_FILIERE.getActeur("BourseCacao"));
-		//Double seuilMax = bourse.getCours((Feve)contrat.getProduit()).getMin();
-		Double seuilMax = 2.0;
+		Double seuilMax = bourse.getCours((Feve)contrat.getProduit()).getMin();
+		//Double seuilMax = 2.0;
 		if (((ChocolatDeMarque)(contrat.getProduit())).isOriginal()) {
 			if (contrat.getPrix()>2*(seuilMax+this.coutTransformation.getValeur()+this.coutOriginal.getValeur())){
 				this.ventes.ajouter("nous acceptons "+contrat.getPrix().toString());
@@ -142,13 +157,21 @@ public class VenteContrat extends Transformation implements IVendeurContratCadre
 		
 		/* Lancer des CC */
 		for (Chocolat c : this.stockChocolat.getProduitsEnStock()) {
-			if (this.stockChocolat.getstock(c) > this.SeuilMinChocolat && c.isBioEquitable() == true) {
-				ChocolatDeMarque choco = new ChocolatDeMarque(c,"BIO'riginal");
-				lanceruncontratVendeur(choco);
-			}
-			if (this.stockChocolat.getstock(c) > this.SeuilMinChocolat && c.isBioEquitable() == false) {
-				ChocolatDeMarque choco = new ChocolatDeMarque(c,"CHOCO'riginal");
-				lanceruncontratVendeur(choco);
+			Gamme g = c.getGamme();
+			boolean be = c.isBioEquitable();
+			for (Feve f : this.stockFeves.getProduitsEnStock()) {
+				if (f.getGamme() == g && f.isBioEquitable() == be) {
+					if (this.stockChocolat.getstock(c) > this.besoinFeves.get(f)) {
+						if (be == true) {
+							ChocolatDeMarque choco_O = new ChocolatDeMarque(c,"BIO'riginal");
+							lanceruncontratVendeur(choco_O);	
+						}
+						else {
+							ChocolatDeMarque choco_nO = new ChocolatDeMarque(c,"CHOCO'riginal");
+							lanceruncontratVendeur(choco_nO);
+						}
+					}
+				}
 			}
 		}
 	}

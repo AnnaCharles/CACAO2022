@@ -1,7 +1,6 @@
 package abstraction.eq7Distributeur2;
 
 
-import abstraction.eq7Distributeur2.tools.VenteTracker;
 import abstraction.eq8Romu.clients.ClientFinal;
 import abstraction.eq8Romu.filiere.Filiere;
 import abstraction.eq8Romu.filiere.IDistributeurChocolatDeMarque;
@@ -26,7 +25,6 @@ public class Distributeur2ChocolatDeMarque extends Distributeur2Achat implements
 	private double prixMinHQ_O = 12;
 	private double prixMinHQ_B = 13;
 	private double prixMinHQ_B_O = 14;
-	
 
 	public Distributeur2ChocolatDeMarque() {
 		super();
@@ -43,81 +41,105 @@ public class Distributeur2ChocolatDeMarque extends Distributeur2Achat implements
 			journalStock.ajouter(choco+" : "+ q+ " kg en stock");
 		}
 		journalStock.ajouter("===========================================");
-	}
 	
 	
-	public double prix(ChocolatDeMarque choco) {
-		if(choco.getGamme()==Gamme.HAUTE && choco.isBioEquitable() && choco.isOriginal()) {
-			return 15.0;
-		}
-		if(choco.getGamme()==Gamme.HAUTE && choco.isBioEquitable()) {
-			return 14.0;
-		}
-		if(choco.getGamme()==Gamme.HAUTE && choco.isOriginal()) {
-			return 13.0;
-		}
-		if(choco.getGamme()==Gamme.HAUTE) {
-			return 12.5;
-		}
-		if(choco.getGamme()==Gamme.MOYENNE && choco.isBioEquitable() && choco.isOriginal()) {
-			return 11.5;
-		}
-		if(choco.getGamme()==Gamme.MOYENNE && choco.isBioEquitable()) {
-			return 10.5;
-		}
-		if(choco.getGamme()==Gamme.MOYENNE && choco.isOriginal()) {
-			return 9.5;
-		}
-		if(choco.getGamme()==Gamme.MOYENNE) {
-			return 9.0;
-		}
-		if(choco.getGamme()==Gamme.BASSE && choco.isOriginal()) {
-			return 8.0;
-		}
-		if(choco.getGamme()==Gamme.BASSE) {
-			return 7.5;
-		}
-		return 0.0;
 	}
+	
+
 		
 //		 Mathis et Camille : le prix des chocolats bioEquitables est mis à chaque étape sous le prix de vente moyen (correspondant à ce chocolat) de l'étape précédente. Au contraire, ceux du non bioEquitable
 //		sont placés au dessus pr créer de la marge. Une fois une certaine part de marché acquise sur un chocolat vendu (75%), le prix ne varie plus (pour éviter de baisser les prix sans fin).		
 		
-//		public double prix(ChocolatDeMarque choco, int currentStep) {
-//		
-//		double prix_precedent = Filiere.LA_FILIERE.prixMoyen(choco, currentStep-1);
-//
-//		double quantiteTotale = Filiere.LA_FILIERE.getVentes(choco, currentStep-1);
-//		double quantiteVendue = 1; // modifier une fois le code de edgar fini */
-//		
-//		if (quantiteVendue/quantiteTotale >= 0.75) {
-//			if (choco.isBioEquitable()) {
-//				if (choco.getGamme()==Gamme.HAUTE) {
-//					return prix_precedent*0.95;
-//				}
-//				if (choco.getGamme()==Gamme.MOYENNE) {
-//					return prix_precedent*0.9;
-//				}
-//				if (choco.getGamme()==Gamme.BASSE) {
-//					return prix_precedent*0.85;
-//				}
-//			}
-//			else {
-//				if (choco.getGamme()==Gamme.HAUTE) {
-//					return prix_precedent*1.15;
-//				}
-//				if (choco.getGamme()==Gamme.MOYENNE) {
-//					return prix_precedent*1.1;
-//				}
-//				if (choco.getGamme()==Gamme.BASSE) {
-//					return prix_precedent*1.05;
-//				}
-//			}
-//		}
-//		else {
-//			return prix_precedent; // modifier pr retourner le prix de vente de l'étape précédente */
-//		}	
-//	}
+	public double prix(ChocolatDeMarque choco) {
+		int currentStep = Filiere.LA_FILIERE.getEtape();
+		if (currentStep != 0) {
+			double prix_precedent = Filiere.LA_FILIERE.prixMoyen(choco, currentStep-1);
+	
+			double quantiteTotale = Filiere.LA_FILIERE.getVentes(choco, currentStep-1);
+			double quantiteVendue = venteTracker.getPreviousVenteQuantite(choco); 
+			
+			if (quantiteVendue/quantiteTotale <= 0.75) {
+				if (choco.isBioEquitable()) {
+					if (choco.getGamme()==Gamme.HAUTE) {
+						double prix = prix_precedent*0.95;
+						if (prix < this.prixMinHQ_B) {
+							prix = this.prixMinHQ_B;
+						}
+						return prix;
+					}
+					if (choco.getGamme()==Gamme.MOYENNE) {
+						double prix = prix_precedent*0.8;
+						if (prix < this.prixMinMQ_B) {
+							prix = this.prixMinMQ_B;
+						}
+						return prix;
+					}
+					else {
+						double prix = prix_precedent*0.95;
+						if (prix < this.prixMinHQ_B_O) {
+							prix = this.prixMinMQ_B_O;
+						}
+						return prix;
+					}
+				}
+				else {
+					if (choco.getGamme()==Gamme.HAUTE) {
+						double prix = prix_precedent*1.15;
+						if (prix < this.prixMinHQ_B) {
+							prix = this.prixMinHQ_B;
+						}
+						return prix;
+					}
+					if (choco.getGamme()==Gamme.MOYENNE) {
+						double prix = prix_precedent*1;
+						if (prix < this.prixMinMQ) {
+							prix = this.prixMinMQ;
+						}
+						return prix;
+					}
+					else {
+						double prix = prix_precedent*1.05;
+						if (prix < this.prixMinBQ) {
+							prix = this.prixMinBQ;
+						}
+						return prix;
+					}
+				}
+			}
+		}else {
+			if(choco.getGamme()==Gamme.HAUTE && choco.isBioEquitable() && choco.isOriginal()) {
+				return 15.0;
+			}
+			if(choco.getGamme()==Gamme.HAUTE && choco.isBioEquitable()) {
+				return 14.0;
+			}
+			if(choco.getGamme()==Gamme.HAUTE && choco.isOriginal()) {
+				return 13.0;
+			}
+			if(choco.getGamme()==Gamme.HAUTE) {
+				return 12.5;
+			}
+			if(choco.getGamme()==Gamme.MOYENNE && choco.isBioEquitable() && choco.isOriginal()) {
+				return 10.5;
+			}
+			if(choco.getGamme()==Gamme.MOYENNE && choco.isBioEquitable()) {
+				return 9.5;
+			}
+			if(choco.getGamme()==Gamme.MOYENNE && choco.isOriginal()) {
+				return 9;
+			}
+			if(choco.getGamme()==Gamme.MOYENNE) {
+				return 8.5;
+			}
+			if(choco.getGamme()==Gamme.BASSE && choco.isOriginal()) {
+				return 8.0;
+			}
+			else{
+				return 7.5;
+			}
+		}
+		return 10.420;
+	}
 	
 	public double quantiteEnVente(ChocolatDeMarque choco, int crypto) {
 		if (crypto!=this.cryptogramme) {

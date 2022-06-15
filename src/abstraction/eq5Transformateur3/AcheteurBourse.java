@@ -10,17 +10,21 @@ public class AcheteurBourse  extends Transformateur3Acteur implements IAcheteurB
 	// Karla 
 	public double demande(Feve f, double cours) {
 		
+		if (!(this.stockFeves.getProduitsEnStock().contains(f))) { 
+			return 0.0;
+		}
 		
 		/* on calcule notre besoin en la fève f (en partant du principe que l'on fait que des transformations classiques)
 		 * pour honorer nos contrats */
-		//Double difference = this.besoinFeves.get(f) - this.dispoFeves.get(f);	
+		Double difference =  this.dispoFeves.get(f) - this.besoinFeves.get(f);	
 		
-		Double difference = 5000.0;
+		//Double difference = 5000.0;
 		
 		/* Si notre stock ne permet pas de répondre au besoin,
 		 * on achète avec une marge de 20% supplémntaire */
 		if (difference > 0.00 ) {
-			difference += 0.20*difference;		
+			difference += 0.20*difference;	
+			this.achats.ajouter(difference.toString());
 		}
 		
 		/* Sinon on achète "proportionnellement" au cours de la bourse */
@@ -31,6 +35,7 @@ public class AcheteurBourse  extends Transformateur3Acteur implements IAcheteurB
 				double pourcentage = (bourse.getCours(f).getMax()-bourse.getCours(f).getValeur())/(bourse.getCours(f).getMax()-bourse.getCours(f).getMin());
 				difference = this.achatMaxFeves * pourcentage;
 			}
+			else { difference = 0.0 ;}
 		}
 		this.achats.ajouter("demande de" + difference + " kg de feve" + f.getGamme().toString() + "à un cours" + cours );
 		return difference;

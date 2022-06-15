@@ -95,7 +95,7 @@ public class Transformateur3Acteur implements IActeur, IMarqueChocolat,IFabrican
 
 
 		
-		Double s = 1000.00;
+		Double s = 1000000.00;
 		this.stockFeves.ajouter(Feve.FEVE_MOYENNE_BIO_EQUITABLE, s);
 		this.stockFeves.ajouter(Feve.FEVE_HAUTE_BIO_EQUITABLE, s);
 		
@@ -139,7 +139,11 @@ public class Transformateur3Acteur implements IActeur, IMarqueChocolat,IFabrican
 		for (Feve f : this.stockFeves.getProduitsEnStock()) {
 			this.besoinFeves.put(f, 0.00);
 			this.dispoFeves.put(f, this.stockFeves.getstock(f));
+			
 		}
+		//this.capaciteStockageEQ5=this.capaciteStockageEQ5*2;
+		//Filiere.LA_FILIERE.getBanque().virer(Filiere.LA_FILIERE.getActeur("EQ5"), this.cryptogramme, Filiere.LA_FILIERE.getActeur("EQ8"), this.prixEntrepot.getValeur()*1);
+		
 	}
 
 	
@@ -239,10 +243,9 @@ public class Transformateur3Acteur implements IActeur, IMarqueChocolat,IFabrican
 			boolean isBioequitable = ((ChocolatDeMarque)contrat.getProduit()).isBioEquitable();
 			for (Feve f : this.besoinFeves.keySet()) {
 				if (f.getGamme() == gamme && f.isBioEquitable() == isBioequitable) {
-					this.besoinFeves.put(f, contrat.getQuantiteALivrerAuStep());	
+					this.besoinFeves.put(f, contrat.getQuantiteALivrerAuStep()+this.besoinFeves.get(f));	
 				}
 			}
-			
 		}
 		
 		/* Maj des disponibilités pour le tour courant */
@@ -250,8 +253,9 @@ public class Transformateur3Acteur implements IActeur, IMarqueChocolat,IFabrican
 			Gamme gamme = ((Feve)contrat.getProduit()).getGamme();
 			boolean isBioequitable = ((Feve)contrat.getProduit()).isBioEquitable();
 			for (Feve f : this.dispoFeves.keySet()) {
+				this.dispoFeves.put(f, this.stockFeves.getstock(f));
 				if (f.getGamme() == gamme && f.isBioEquitable() == isBioequitable) {
-					this.dispoFeves.put(f, this.stockFeves.getstock(f)+contrat.getQuantiteALivrerAuStep());	
+					this.dispoFeves.put(f, this.dispoFeves.get(f)+contrat.getQuantiteALivrerAuStep());	
 				}
 			}
 		}

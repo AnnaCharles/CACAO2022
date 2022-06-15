@@ -23,6 +23,7 @@ public abstract class Transformateur2Stock extends Transformateur2ContratCadreVe
 	protected double notreCapaciteStockage; //elle évolue lorsqu'on achète des new capacités de stockage
 	
 	public Transformateur2Stock() {
+		
 		this.journalStock=new Journal("O'ptiStock",this);
 		
 		//LES STOCKS INITIAUX----VALEURS A CHOISIR

@@ -38,7 +38,6 @@ public class ProducteurActeur1VenteBourse extends Producteur1Producteur implemen
 				this.getPrixmoyenFeve().put(f, cours);
 			
 			}
-		
 			
 			this.repartitionGuerre =  parcGuerre() ;
 			
@@ -47,32 +46,66 @@ public class ProducteurActeur1VenteBourse extends Producteur1Producteur implemen
 			if (Filiere.LA_FILIERE.getEtape()>=1) {
 				// Ici, étape + 1 car la 1e etape est l'étape 0, et on y rentre le cours
 				
-				if (this.getStock(f, false)<1000000) {
-					double tauxdecroit = ((0.75-1)/1000000)*this.getStock(f, false) + 1 ; //Taux décroissant sur 1 million jusqu'à 75 %
-					if ((this.getPrixmoyenFeve().get(f)/(Filiere.LA_FILIERE.getEtape()+1))*tauxdecroit <= cours) {
-						double stock = 0 ;
-						if (repartitionGuerre != null) {
-						for (Parc ele : repartitionGuerre.keySet()) {
-							stock += this.getStockParc(f, false, ele);
-						}
-						return stock;
-						}
-					}
-				}
+			if (this.getStock(f, false)>0) {
+				if (this.getStock(f, false)<1000000000) {
+					double tauxdecroit = ((0.25-1)/1000000000)*this.getStock(f, false) + 1 ; //Taux décroissant sur 100 million jusqu'à 50 %
+					return venteBourse(f, cours, tauxdecroit);
+			
+			}
 				else {
-					if ((this.getPrixmoyenFeve().get(f)/(Filiere.LA_FILIERE.getEtape()+1))*0.75 <= cours) {
-						if (repartitionGuerre !=  null) {
-						double stock = 0 ;
-						for (Parc ele : repartitionGuerre.keySet()) {
-							stock += this.getStockParc(f, false, ele);
-						}
-						return stock;
-						}
-					}
+					return venteBourse(f, cours, 0.25);
+		}
+			}
+			}
+			}
+			
+		return 0.0 ;
+	}
+			
+	
+	
+	public double venteBourse(Feve f, double cours, double tauxdecroit) {
+		double coutStockage=Filiere.LA_FILIERE.getParametre("Prix Stockage").getValeur(); 
+		double coutProduction=this.getPrixEntretienArbre().getValeur();
+		double coutTotalFeve= coutProduction + coutStockage*this.getFeves().get(f).get(0).getAge();
+		
+		if(f==Feve.FEVE_BASSE) {
+			if (cours>coutTotalFeve && (this.getPrixmoyenFeve().get(f)/(Filiere.LA_FILIERE.getEtape()+1))*tauxdecroit <= cours) {
+				double stock = 0 ;
+				if (repartitionGuerre != null) {
+				for (Parc ele : repartitionGuerre.keySet()) {
+					stock += this.getStockParc(f, false, ele);
+				}
+				return stock*0.25;
 				}
 			}
 		}
-		return 0.0 ;
+			
+			if(f==Feve.FEVE_MOYENNE) {
+			if (cours>coutTotalFeve*1.1 && (this.getPrixmoyenFeve().get(f)/(Filiere.LA_FILIERE.getEtape()+1))*tauxdecroit <= cours) {
+				double stock = 0 ;
+				if (repartitionGuerre != null) {
+				for (Parc ele : repartitionGuerre.keySet()) {
+					stock += this.getStockParc(f, false, ele);
+				}
+				return stock*0.25;
+				}
+			}
+		}
+			
+			if(f==Feve.FEVE_MOYENNE_BIO_EQUITABLE) {
+				if (cours>coutTotalFeve*1.3 && (this.getPrixmoyenFeve().get(f)/(Filiere.LA_FILIERE.getEtape()+1))*tauxdecroit <= cours) {
+					double stock = 0 ;
+					if (repartitionGuerre != null) {
+					for (Parc ele : repartitionGuerre.keySet()) {
+						stock += this.getStockParc(f, false, ele);
+					}
+					return stock*0.25;
+					}
+				}
+			}
+		
+		return 0.0;
 	}
 
 
@@ -107,7 +140,8 @@ public class ProducteurActeur1VenteBourse extends Producteur1Producteur implemen
 		double coutStockage=Filiere.LA_FILIERE.getParametre("Prix Stockage").getValeur(); 
 		double coutProduction=this.getPrixEntretienArbre().getValeur();
 		double coutTotalFeve= coutProduction + coutStockage*this.getFeves().size();
-		double tauxdecroit = (((0.75-1)/1000000)*this.getStock(f, false) + 1)/this.getStock(f, false) ; //Taux décroissant sur 1 million jusqu'à 75 % 
+		double tauxdecroit = (((0.50-1)/1000000)*this.getStock(f, false) + 1)/this.getStock(f, false) ; //Taux décroissant sur 1 million jusqu'à 75 % 
+		
 		if(f!=Feve.FEVE_HAUTE_BIO_EQUITABLE) { //Pas de bourse pour le HAUT_BE 
 			if (Filiere.LA_FILIERE.getEtape()>=1) { 
 				if (this.getStock(f, false)<1000000) {

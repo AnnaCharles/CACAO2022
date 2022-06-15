@@ -15,7 +15,7 @@ import abstraction.eq8Romu.produits.Feve;
 
 public class AcheteurContrat extends AcheteurBourse  implements IAcheteurContratCadre {
 
-	//private int nb_nego;
+	private int nb_nego;
 	
 	//Karla / Julien
 	/* Initier un contrat */
@@ -23,7 +23,7 @@ public class AcheteurContrat extends AcheteurBourse  implements IAcheteurContrat
 		SuperviseurVentesContratCadre superviseur = ((SuperviseurVentesContratCadre)(Filiere.LA_FILIERE.getActeur("Sup.CCadre")));
 		List<IVendeurContratCadre> L = superviseur.getVendeurs(f); 
 		
-		Echeancier e = new Echeancier(Filiere.LA_FILIERE.getEtape()+1, 10, qtt); //qtt kg de feves par etape pendant  10 steps
+		Echeancier e = new Echeancier(Filiere.LA_FILIERE.getEtape()+1, 3, qtt); //qtt kg de feves par etape pendant  10 steps
 		if (L.size()!=0) {
 			if (L.size()== 1) {
 				ExemplaireContratCadre contrat = superviseur.demandeAcheteur((IAcheteurContratCadre)Filiere.LA_FILIERE.getActeur("EQ5"), L.get(0), (Object)f,  e, this.cryptogramme, false);
@@ -75,15 +75,13 @@ public class AcheteurContrat extends AcheteurBourse  implements IAcheteurContrat
 	public double contrePropositionPrixAcheteur(ExemplaireContratCadre contrat) {
 		double prixT = contrat.getPrix();
 		BourseCacao bourse = (BourseCacao)(Filiere.LA_FILIERE.getActeur("BourseCacao"));
-		Double seuilMax = bourse.getCours((Feve)contrat.getProduit()).getMin();
-		// double seuilMax=2.0;
+		Double seuilMax = bourse.getCours((Feve)contrat.getProduit()).getMax();
 		if (prixT < seuilMax) { 
 			this.achats.ajouter("prix acceptable");
 			return prixT;
 		}
 		else {
-			double proportion = 0.70 ;/*+0.05*this.nb_nego;*/
-			double nouveauprix = proportion*prixT;
+			double nouveauprix = 0.7*prixT;
 			if (nouveauprix < seuilMax) { 
 				this.achats.ajouter(" essaie avec nouveau prix");
 				return nouveauprix;
@@ -138,14 +136,15 @@ public class AcheteurContrat extends AcheteurBourse  implements IAcheteurContrat
 			Double stocktotal = this.stockFeves.getstocktotal()+this.stockChocolat.getstocktotal();
 			
 			if (stocktotal < this.capaciteStockageEQ5) {
-				if (this.stockFeves.getstock(f) < this.SeuilMinFeves) {
-					Double placeLibre = this.stockChocolat.getstocktotal() - this.stockFeves.getstocktotal();
-					if (placeLibre > 0) {
+
+				//if (this.stockFeves.getstock(f) < this.SeuilMinFeves) {
+					Double placeLibre = this.capaciteStockageEQ5 - stocktotal;
+					if (placeLibre > 0.0) {
 					/* On essaie d'initier un contrat pour une qtt de placeLibre/nombre de types de fèves */
 						Double qtt = placeLibre/4;
-						lanceruncontratAcheteur(f, qtt);
+						lanceruncontratAcheteur(f, qtt/10);
 					}
-				}
+				//}
 			}
 		}
 	}

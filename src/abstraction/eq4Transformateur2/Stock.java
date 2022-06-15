@@ -11,29 +11,32 @@ public class Stock<I> {
 
 	private HashMap<I,Double> stock;
 	
-	//Nawfel
+// Nawfel
 	public Stock(HashMap<I, Double> stock) {
 		this.stock = stock;
 	}
 	
+// Nawfel
 	public Stock() {
 		this.stock=new HashMap<I,Double>();
 	}
 	
 	
 	
-	//Marie
-		public double getQuantite(I produit) {
-			if (this.stock.keySet().contains(produit)) {
-				return this.stock.get(produit);
-			}else {
-				return 0;
-			}
+// Marie
+	// Pour un produit donné, renvoie la quantité contenu dans le stock si nous avons le produit, 0 autrement.
+	public double getQuantite(I produit) {
+		if (this.stock.keySet().contains(produit)) {
+			return this.stock.get(produit);
 		}
+		else {
+			return 0;
+		}
+	}
 	
 	
-	//Nawfel
-	//Faire la somme  de toutes les values
+// Nawfel
+// Renvoie le quantité total contenu dans le stock/
 	public double getStocktotal() {
 		double somme=0;
 		for(Double qt :this.stock.values()) {
@@ -42,37 +45,34 @@ public class Stock<I> {
 		return somme;
 	}
 	
-	// Gabriel
-//	public void setStock(double newst) {
-//		this.stocktotal = this.stocktotal - newst;
-//	}
-	
-	//Marie
+// Marie
 	public void ajouter (I produit, double qt) {
-		if (qt>0) {	
-			
-			if (this.stock.keySet().contains(produit)) {
-				this.stock.put(produit, this.stock.get(produit)+qt); //
-			}else {
-				this.stock.put(produit, qt);}
-	}else{
-		throw new IllegalArgumentException("impossible");
+		if (qt>0) {	// L'ajout n'est possible que pour une quantité positive
+
+			if (this.stock.keySet().contains(produit)) { 
+				this.stock.put(produit, this.stock.get(produit)+qt);
+				// Si nous avons déjà un stock du produit, la nouveau stock est la somme de qt et du stock initial
+			}
+			else {
+				this.stock.put(produit, qt);} // Si on ne stockons pas le produit, ajout à la HashMap du stock
+		}else{
+			throw new IllegalArgumentException("impossible"); // Quantité négative impossible
+		}
 	}
-	}
-	
+// Marie	
 	public void enlever (I produit, double qt) {
-	if (qt>0) {	
+	if (qt>0) {	// Le retrait n'est possible que pour une quantité positive
 		if (this.stock.keySet().contains(produit) ) {
 			this.stock.put(produit, this.stock.get(produit)-qt);
+			// Si nous avons du stock du produit, la nouveau stock est la différence du stock initial et de qt
 	}}
 	else{
-		throw new IllegalArgumentException("impossible");
+		throw new IllegalArgumentException("impossible"); // Quantité négative impossible
 }
 }
 		
 
-	// Marie
-
+// Marie
 	public double stockRestant(I produit,double notreCapaciteStockage) {
 		return (notreCapaciteStockage/2)-this.getStocktotal();
 	}
@@ -94,15 +94,7 @@ public class Stock<I> {
 	public Set<I> keySet() {
 		return this.stock.keySet();
 	}
-	/*public double coutStockage( Filiere.LA_FILIERE.getIndicateur("prix_stockage")) { // demander comment ajouter variables
-		return (this.quantiteStockTotale(produit)*(Filiere.LA_FILIERE.getIndicateur("prix_stockage").getValeur())); // demander a Alexandre comment calculer prix 
-	}*/
 
-
-
-//	public void setQuantite_stock(HashMap<I,Double> quantite_stock) {
-//		this.quantite_stock = quantite_stock;
-//	}
 
 	
 }

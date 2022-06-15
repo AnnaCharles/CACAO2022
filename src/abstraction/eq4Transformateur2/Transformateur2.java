@@ -26,6 +26,7 @@ public class Transformateur2 extends Transformateur2VenteAO{
 
 	private Journal journalcours;
 	
+// Nawfel
 	public void next() {
 		super.next();
 		journalcours.ajouter(Color.white,Color.red,"Cours Feve Basse : "+Filiere.LA_FILIERE.getIndicateur("BourseCacao cours B").getValeur() +" €/kg");
@@ -35,10 +36,13 @@ public class Transformateur2 extends Transformateur2VenteAO{
 		journalcours.ajouter(Color.white,Color.red,"Cours Feve Haute BIO : "+Filiere.LA_FILIERE.getIndicateur("BourseCacao cours HBE").getValeur() +" €/kg");
 		journalcours.ajouter(Color.LIGHT_GRAY,Color.magenta,"-----------------------------------------------------------------------------------------------------------------------");
 	}
+	
+// Nawfel 
 	public void initialiser() {
 		super.initialiser();
 	}
-
+	
+// Nawfel
 	public Transformateur2 () {
 		super();
 		this.journalcours=new Journal("O'ptiCours", this);
@@ -46,16 +50,17 @@ public class Transformateur2 extends Transformateur2VenteAO{
 		
 	}
 	
-
+// Marie
 	public LinkedList<String> getMarquesChocolat() {
 		LinkedList<String> res = new LinkedList<String>();
-		res.add("O'ptella");//bas de gamme
-		res.add("O'max");//moyen de gamme
-		res.add("O'lait");//moyen de gamme bio
-		res.add("O'Chock");//haut de gamme 
-		res.add("O'vert");//haut de gamme bio
+		res.add("O'ptella");// Bas de gamme
+		res.add("O'max");// Moyen de gamme
+		res.add("O'lait");// Moyen dde gamme bio
+		res.add("O'Chock");// Haut de gamme 
+		res.add("O'vert");// Haut de gamme bio
 		return res;
 	}
+// Nawfel	
 	public Journal getJournalcours() {
 		return journalcours;
 	}
