@@ -199,10 +199,12 @@ public class Transformateur1 extends Transformateur1AppelsOffres implements IMar
 			if (f == Feve.FEVE_BASSE || f == Feve.FEVE_MOYENNE || f == Feve.FEVE_MOYENNE_BIO_EQUITABLE) {
 				journalSF.ajouter("stock de " + f.name() + " : " + stockFeve.get(f));
 				journalSF.ajouter("Cout de stockage " + f.name() + " : " + stockFeve.get(f)*coutStockage);
+				journalAO.ajouter("le stock du chocolat"+ f + " est "+stockFeve.get(f));
 			}
 		}
 		for (Chocolat c : stockChoco.keySet()) {
 			cout = cout + stockChoco.get(c)*coutStockage; 
+			journalAO.ajouter("le stock du chocolat"+ c + " est "+stockChoco.get(c));
 			
 			if (c == Chocolat.MQ_BE || c == Chocolat.MQ_O || c == Chocolat.MQ) {
 				journalSC.ajouter("stock de choco " + c.name() + " : " + stockChoco.get(c));
