@@ -126,9 +126,7 @@ public abstract class Transformateur2Bourse extends Transformateur2Transfo imple
 // Marie et Jad
 		public void notificationAchat(Feve f, double quantiteEnKg, double coursEnEuroParKg) {
 		this.getStockfeve().ajouter(f,quantiteEnKg); // Actualisation du stock en cas d'achat
-
-//		this.getAchat_feve().ajouter(f,quantiteEnKg);
-
+		this.getAchat_feve().ajouter(f,quantiteEnKg);
 		Filiere.LA_FILIERE.getBanque().virer(this, this.cryptogramme, Filiere.LA_FILIERE.getBanque(), coursEnEuroParKg*quantiteEnKg);
 		this.getJournalAchat().ajouter("Achat de "+quantiteEnKg+" kg de fèves "+f+" pour "+coursEnEuroParKg +" €/kg");
 	}

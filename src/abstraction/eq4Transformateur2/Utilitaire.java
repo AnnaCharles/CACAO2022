@@ -4,6 +4,8 @@ import abstraction.eq8Romu.filiere.Filiere;
 import java.util.*;
 
 //Jad
+
+
 public class Utilitaire<I> {
 	
 
@@ -35,7 +37,7 @@ public class Utilitaire<I> {
 	public double getQuantUtiliseeDepuis(I produit,int n) {
 		double somme=0;
 		if (this.uti.keySet().contains(produit)) {
-			for(int i=0; i<13;i++) {
+			for(int i=0; i<Filiere.LA_FILIERE.getIndicateur("dureePeremption").getValeur()-1;i++) {
 				somme+=this.uti.get(produit).get(n+i);
 		}
 		}
@@ -49,13 +51,24 @@ public class Utilitaire<I> {
 		if (qt>0) {	
 			
 			if (this.uti.keySet().contains(produit)) {
-				this.uti.get(produit).addLast(qt);; //
-	}else{
+				if (this.uti.get(produit).size()<Filiere.LA_FILIERE.getEtape())
+				this.uti.get(produit).add(qt);; //
+	}
+				else if(this.uti.get(produit).size()==Filiere.LA_FILIERE.getEtape()) {
+					this.uti.get(produit).set(this.uti.get(produit).size()-1, this.uti.get(produit).get(this.uti.get(produit).size()-1)+qt);
+				}
+			else{
 		throw new IllegalArgumentException("impossible");
 	}
 	}
 	}
 	
+	
+	public void intro(I produit,double qt) {
+		LinkedList<Double> l=new LinkedList<Double>();
+		l.add(qt);
+		this.uti.put(produit, l);
+	}
 
 		
 

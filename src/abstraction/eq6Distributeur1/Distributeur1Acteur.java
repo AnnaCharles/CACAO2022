@@ -9,10 +9,6 @@ import java.util.Map;
 import java.util.Random;
 
 import abstraction.eq8Romu.filiere.Filiere;
-import abstraction.eq8Romu.contratsCadres.Echeancier;
-import abstraction.eq8Romu.contratsCadres.ExemplaireContratCadre;
-import abstraction.eq8Romu.contratsCadres.IAcheteurContratCadre;
-import abstraction.eq8Romu.contratsCadres.IVendeurContratCadre;
 import abstraction.eq8Romu.contratsCadres.SuperviseurVentesContratCadre;
 import abstraction.eq8Romu.filiere.IActeur;
 import abstraction.eq8Romu.general.Journal;
@@ -21,7 +17,6 @@ import abstraction.eq8Romu.general.VariableReadOnly;
 import abstraction.eq8Romu.produits.Chocolat;
 import abstraction.eq8Romu.produits.ChocolatDeMarque;
 import abstraction.eq8Romu.produits.Gamme;
-import abstraction.eq8Romu.produits.Chocolat;
 
 public class Distributeur1Acteur implements IActeur {
 	protected int cryptogramme;
@@ -44,8 +39,6 @@ public class Distributeur1Acteur implements IActeur {
 	protected Double TauxTour; // renvoi la part de marché visée par FourAll pour le tour en cours
 	protected final double partCC = 0.9;
 	protected Journal stockJ;
-	protected Map<ChocolatDeMarque, Boolean> achat;
-	private Journal ceQuonAchete;
 	
 	/**
 	 * @return the notreStock
@@ -64,9 +57,6 @@ public class Distributeur1Acteur implements IActeur {
 		JournalPrincipal = new Journal("Journal Principal",this);
 		JournalCompte = new Journal("Journal Compte",this);
 		JournalVente = new Journal("Journal des Ventes", this);
-		ceQuonAchete = new Journal("Ce qu'on achete", this);
-
-		achat = new HashMap<ChocolatDeMarque, Boolean>();
 
 		
 		this.prixTotalTour = 100000.0;
@@ -105,7 +95,6 @@ public class Distributeur1Acteur implements IActeur {
 		supCCadre = ((SuperviseurVentesContratCadre)(Filiere.LA_FILIERE.getActeur("Sup.CCadre")));
 		for (ChocolatDeMarque C : Filiere.LA_FILIERE.getChocolatsProduits()) {
 			HistoChoco.put(C, new VariableReadOnly(C.toString(), this,0));
-			achat.put(C, true);
 
 		}
 		NotreStock.initialiser();
@@ -143,6 +132,12 @@ public class Distributeur1Acteur implements IActeur {
 	}
 	
 	public void next() {
+		for (ChocolatDeMarque choco : NotreStock.getMapStock().keySet()) {
+			if (NotreStock.getStock(choco) > 100*partDuMarcheVoulu(choco.getChocolat()) * Filiere.LA_FILIERE.getVentes(choco, (Filiere.LA_FILIERE.getEtape()%24) - 24)) {
+				NotreStock.addQte(choco, -NotreStock.getStock(choco)/2);
+			}
+		}
+		
 		//leorouppert
 		for (ChocolatDeMarque C : Filiere.LA_FILIERE.getChocolatsProduits()) {
 			JournalVente.ajouter("Ventes de " + C + " au tour  " +Filiere.LA_FILIERE.getEtape()+" : "+ (HistoChoco.get(C).getValeur(Filiere.LA_FILIERE.getEtape(),cryptogramme)-HistoChoco.get(C).getValeur(Filiere.LA_FILIERE.getEtape()-1,cryptogramme)));
@@ -168,16 +163,6 @@ public class Distributeur1Acteur implements IActeur {
 		JournalPrincipal.ajouter("Tour "+ Filiere.LA_FILIERE.getEtape() +" terminé pour "+ this.getNom());
 	
 		afficherStockJournal();
-		for (ChocolatDeMarque choco : Filiere.LA_FILIERE.getChocolatsProduits()) {
-			if (! achat.containsKey(choco)) {
-				achat.put(choco, true);
-
-			}
-			if (HistoChoco.get(choco).getValeur(Filiere.LA_FILIERE.getEtape() - 1) < 0.0001*NotreStock.getStock(choco)) {
-				ceQuonAchete.ajouter("on achetera plus de " + choco);
-				achat.put(choco, false);
-			}
-		}
 	}
 	
 	
@@ -230,7 +215,6 @@ public class Distributeur1Acteur implements IActeur {
 		journaux.add(JournalPrincipal);
 		journaux.add(JournalCompte);
 		journaux.add(stockJ);
-		journaux.add(ceQuonAchete);
 		journaux.add(JournalVente);
 		return journaux;
 	}

@@ -14,25 +14,21 @@ import abstraction.eq8Romu.contratsCadres.SuperviseurVentesContratCadre;
 import abstraction.eq8Romu.filiere.Filiere;
 import abstraction.eq8Romu.general.Journal;
 import abstraction.eq8Romu.produits.ChocolatDeMarque;
-import abstraction.eq8Romu.produits.Gamme;
 
 public class AcheteurContrat extends DistributeurChocolatDeMarque implements IAcheteurContratCadre{//leorouppert
 	protected Journal journalNegociationCC;
 	protected Journal journalSuiviCC;
 	protected List<ExemplaireContratCadre> mesContrats;
-	private final double SEUIL_DELTA_ECHEANCE_PROPOSEE = 0.7;
 	private final double SEUIL_AJOUT_ECHEANCE = 0.3;
 	private final int STEP_INTERSECTION_MIN = 6;
 	private final double PRIX_LIMITE = 1.2;
 	private final int MIN_NEGO = 5;
-	Map<Long, Boolean> enRetard;
 	
 	public AcheteurContrat() {
 		super();
 		mesContrats = new ArrayList<ExemplaireContratCadre>();
 		journalNegociationCC = new Journal("Negociations CC", this);
 		journalSuiviCC = new Journal("Suivi des livraisons des CC", this);
-		enRetard = new HashMap<Long, Boolean>();
 	}
 
 
@@ -64,7 +60,6 @@ public class AcheteurContrat extends DistributeurChocolatDeMarque implements IAc
 	private void negoReussie(ExemplaireContratCadre ecc) {
 		journalNegociationCC.ajouter(Color.GREEN, Color.BLACK, "Négociation réussie ! Contrat #" + ecc.getNumero());
 		mesContrats.add(ecc);
-		enRetard.put(ecc.getNumero(), false);
 		setPrixVente((ChocolatDeMarque)ecc.getProduit(), ecc.getPrix());
 	}
 	
@@ -139,6 +134,7 @@ public class AcheteurContrat extends DistributeurChocolatDeMarque implements IAc
 				double prop = 0.0;
 				prop = (contrat.getPrix() + espere)/2;
 				journalNegociationCC.ajouter("--> Nous negocions un prix de " + prop);
+				return prop;
 			}
 			journalNegociationCC.ajouter("--> Nous acceptons le prix proposé qui est " + contrat.getPrix());
 			return contrat.getPrix();
@@ -154,13 +150,11 @@ public class AcheteurContrat extends DistributeurChocolatDeMarque implements IAc
 	public void receptionner(Object produit, double quantite, ExemplaireContratCadre contrat) {
 		double qteAttendu = contrat.getQuantiteALivrerAuStep();
 		if (quantite != qteAttendu) {
-			// enRetard.put(contrat.getNumero(), true);
 			journalSuiviCC.ajouter(Color.RED, Color.BLACK, "Il manque " + (qteAttendu - quantite) + "Kg de ce que nous etions censé recevoir de " + contrat.getVendeur().getNom() + " pour le contrat #" + contrat.getNumero());
 			
 		}
 		else {
 			journalSuiviCC.ajouter("La quantité attendu (" + quantite + ") a été recu de " + contrat.getVendeur().getNom() + " pour le contrat #" + contrat.getNumero());
-			enRetard.put(contrat.getNumero(), false);
 		}
 		this.getNotreStock().addQte((ChocolatDeMarque) produit, quantite);
 		this.setPrixVente((ChocolatDeMarque) produit, contrat.getPrix());
@@ -171,7 +165,6 @@ public class AcheteurContrat extends DistributeurChocolatDeMarque implements IAc
 		for (ExemplaireContratCadre contrat : mesContrats) {
 			if (contrat.getQuantiteRestantALivrer() == 0.0 && contrat.getMontantRestantARegler() == 0.0) {
 				aSupprimer.add(contrat);
-				enRetard.remove(contrat.getNumero());
 			}
 		}
 		mesContrats.removeAll(aSupprimer);		
@@ -188,9 +181,6 @@ public class AcheteurContrat extends DistributeurChocolatDeMarque implements IAc
 			res.put(choco, new Echeancier());
 		}
 		for (ExemplaireContratCadre ecd : mesContrats) {
-			// if (enRetard.get(ecd.getNumero())) {
-			// 	continue;
-			// }
 			ChocolatDeMarque cm = (ChocolatDeMarque) ecd.getProduit();
 			Echeancier e = ecd.getEcheancier();
 			int start = (e.getStepDebut() < Filiere.LA_FILIERE.getEtape()+1) ? Filiere.LA_FILIERE.getEtape()+1 : e.getStepDebut();
@@ -213,7 +203,7 @@ public class AcheteurContrat extends DistributeurChocolatDeMarque implements IAc
 		double res = 0;
 		int ajd = Filiere.LA_FILIERE.getEtape();
 		for (int i = ajd+1; i <= n+ajd; i++) {
-			res += Filiere.LA_FILIERE.getVentes(choco, i-24);
+			res += Filiere.LA_FILIERE.getVentes(choco, (i%24)-24);
 		}
 		return res;
 	}
@@ -224,7 +214,7 @@ public class AcheteurContrat extends DistributeurChocolatDeMarque implements IAc
 		for (int i = stepDebut; i < stepDebut + 24; i++) {
 			double aComblerI = (aCombler == null) ? 0 : aCombler.getQuantite(i);
 			stock += aComblerI;
-			double doitAvoir = partCC*Filiere.LA_FILIERE.getVentes(c, i-24) * partDuMarcheVoulu(c.getChocolat());
+			double doitAvoir = partCC*Filiere.LA_FILIERE.getVentes(c, (i%24)-24) * partDuMarcheVoulu(c.getChocolat());
 			if (stock < doitAvoir) {
 				e.set(i, doitAvoir-stock);
 				stock = 0;

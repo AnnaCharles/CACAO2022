@@ -44,9 +44,6 @@ public class AcheteurAO extends AcheteurContrat implements IAcheteurAO {
      */
     @Override
     public double proposerPrix(OffreVente offre) {
-        // if (achat.containsKey(offre.getChocolat()) && ! achat.get(offre.getChocolat())) {
-        //     return 0.0;
-        // }
         journalAO.ajouter(Color.CYAN, Color.BLACK, "Nouvelle appel d'offre de "  + offre.getVendeur() + " pour " + offre.getQuantiteKG() + " de " + offre.getChocolat());
         if (NotreStock.seuilSecuFaillite() == true) {   //EmmaHumeau
     		return 0.0;
