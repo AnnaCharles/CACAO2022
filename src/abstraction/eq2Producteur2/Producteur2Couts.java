@@ -29,11 +29,11 @@ public abstract class Producteur2Couts extends Producteur2Plantation {
 	}
 
 	public void setCoutParKg() {
-		this.coutParKg.put(Feve.FEVE_HAUTE_BIO_EQUITABLE, (this.coutHQ_BE*this.getNbArbre(Feve.FEVE_HAUTE_BIO_EQUITABLE))/this.production(Feve.FEVE_HAUTE_BIO_EQUITABLE));
-		this.coutParKg.put(Feve.FEVE_HAUTE, (this.coutHQ*this.getNbArbre(Feve.FEVE_HAUTE))/this.production(Feve.FEVE_HAUTE));
-		this.coutParKg.put(Feve.FEVE_MOYENNE_BIO_EQUITABLE, (this.coutMQ_BE*this.getNbArbre(Feve.FEVE_MOYENNE_BIO_EQUITABLE))/this.production(Feve.FEVE_MOYENNE_BIO_EQUITABLE));
-		this.coutParKg.put(Feve.FEVE_MOYENNE, (this.coutMQ*this.getNbArbre(Feve.FEVE_MOYENNE))/this.production(Feve.FEVE_MOYENNE));
-		this.coutParKg.put(Feve.FEVE_BASSE, (this.coutBQ*this.getNbArbre(Feve.FEVE_BASSE))/this.production(Feve.FEVE_BASSE));
+		this.coutParKg.put(Feve.FEVE_HAUTE_BIO_EQUITABLE, (this.coutHQ_BE*this.getNbArbreTotal(Feve.FEVE_HAUTE_BIO_EQUITABLE))/this.production(Feve.FEVE_HAUTE_BIO_EQUITABLE));
+		this.coutParKg.put(Feve.FEVE_HAUTE, (this.coutHQ*this.getNbArbreTotal(Feve.FEVE_HAUTE))/this.production(Feve.FEVE_HAUTE));
+		this.coutParKg.put(Feve.FEVE_MOYENNE_BIO_EQUITABLE, (this.coutMQ_BE*this.getNbArbreTotal(Feve.FEVE_MOYENNE_BIO_EQUITABLE))/this.production(Feve.FEVE_MOYENNE_BIO_EQUITABLE));
+		this.coutParKg.put(Feve.FEVE_MOYENNE, (this.coutMQ*this.getNbArbreTotal(Feve.FEVE_MOYENNE))/this.production(Feve.FEVE_MOYENNE));
+		this.coutParKg.put(Feve.FEVE_BASSE, (this.coutBQ*this.getNbArbreTotal(Feve.FEVE_BASSE))/this.production(Feve.FEVE_BASSE));
 	}
 	
 	

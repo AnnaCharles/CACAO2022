@@ -58,6 +58,8 @@ public abstract class Transformateur2VenteAO extends Transformateur2Bourse imple
 		if (retenue!=null) {
 			// Actualisation du stock en cas de vente
 			this.getStockchocolatdemarque().enlever(retenue.getOffre().getChocolat(), retenue.getOffre().getQuantiteKG()); 
+
+//			this.getVente_choco().ajouter(retenue.getOffre().getChocolat(),  retenue.getOffre().getQuantiteKG());
 			this.getJournalVente().ajouter("Merci à "+retenue.getAcheteur().getNom()+ " ! Faites bon usage de vos "+ retenue.getOffre().getQuantiteKG()+" kg.");
 			this.getJournalVente().ajouter(Color.white,Color.red,"-----------------------------------------------------------------------------------------------------------------");
 		} 

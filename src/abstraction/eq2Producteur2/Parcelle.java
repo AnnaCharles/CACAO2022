@@ -39,8 +39,7 @@ public class Parcelle {
 		this.setImpactRendementParasite(1);
 		
 		// Attention : pour le moment on a 40 millions d'arbres et pas 400 millions car 1 parcelle = 10 000 arbres
-		// A voir si on peut augmenter le nombre d'arbres dans 1 parcelle si on arrive à vendre car 
-		// pour le moment (08 juin), on n'arrive plus à faire des bénéfices 
+		
 		
 		
 	}
@@ -48,7 +47,8 @@ public class Parcelle {
 	public void next() {
 		this.MAJMaladie();
 		this.MAJTensionGeopo();
-		this.MAJParasite();
+		//this.setImpactRendementParasite(0);
+		//this.MAJParasite();
 		this.MAJAleaClimatique();
 	}
 
@@ -109,6 +109,10 @@ public class Parcelle {
 	}
 	
 	public void MAJMaladie() { //Écrit par Antoine
+		//System.out.println("Alea climatique : " + this.AleaClimatique);
+		//System.out.println("stade maladie : " + this.StadeMaladie);
+		//System.out.println("stade tension géopolitique : "+ this.StadeTensionGeopolitique);
+		//System.out.println("impact rendement parasite : " + this.ImpactRendementParasite);
 		if (StadeMaladie == 0) {
 			double d = Math.random();
 			if (d<=0.03) {
@@ -135,18 +139,25 @@ public class Parcelle {
 				}
 			}
 		}
-		if ((this.StadeMaladie == 1) && (Filiere.LA_FILIERE.getEtape() - this.getDebutMaladie() == 2)) {
-			this.setStadeMaladie(0);
+		
+		
+		else {
+			
+			if ((this.StadeMaladie == 1) && (Filiere.LA_FILIERE.getEtape() - this.getDebutMaladie() == 2)) {
+				this.setStadeMaladie(0);
+			}
+			if ((this.StadeMaladie == 2) && (Filiere.LA_FILIERE.getEtape() - this.getDebutMaladie() == 5)) {
+				this.setStadeMaladie(0);
+			}
+			if ((this.StadeMaladie == 3) && (Filiere.LA_FILIERE.getEtape() - this.getDebutMaladie() == 6)) {
+				this.setStadeMaladie(0);
+			}
+			if ((this.StadeMaladie == 4) && (Filiere.LA_FILIERE.getEtape() - this.getDebutMaladie() == 8)) {
+				this.setStadeMaladie(0);
+			}
+			
 		}
-		if ((this.StadeMaladie == 2) && (Filiere.LA_FILIERE.getEtape() - this.getDebutMaladie() == 5)) {
-			this.setStadeMaladie(0);
-		}
-		if ((this.StadeMaladie == 3) && (Filiere.LA_FILIERE.getEtape() - this.getDebutMaladie() == 6)) {
-			this.setStadeMaladie(0);
-		}
-		if ((this.StadeMaladie == 4) && (Filiere.LA_FILIERE.getEtape() - this.getDebutMaladie() == 8)) {
-			this.setStadeMaladie(0);
-		}
+	
 	}
 
 	public int getDebutMaladie() {
@@ -185,7 +196,7 @@ public class Parcelle {
 	}
 
 	public double MAJParasite() {
-		// auteure : Fiona 
+		// auteur : Fiona 
 		
 		double proba = Math.random();
 		if (this.getTypeArbre() == Arbre.ARBRE_HGB || this.getTypeArbre() == Arbre.ARBRE_MGB) {
@@ -195,36 +206,42 @@ public class Parcelle {
 					this.setImpactRendementParasite(0.1);
 					return 0.1;
 				}
-				if (proba_impact<0.2) {
+				else if (proba_impact<0.2) {
 					this.setImpactRendementParasite(0.5);
 					return 0.5;
 				
 				}
-				if (proba_impact<0.1) {
+				else if (proba_impact<0.1) {
 					this.setImpactRendementParasite(0.8);
 					return 0.8;
 					
 				}
 			}
+			else {
+				
+			}
 		}
 		
 		else {
 			if (proba < 0.1) {
-				double proba_impact = Math.random();
-				if (proba_impact<=0.7) {
+				double proba_impact_ = Math.random();
+				if (proba_impact_<=0.7 ) {
 					this.setImpactRendementParasite(0.1);
 					return 0.1;
 				}
-				if (proba_impact<0.2) {
+				else if (proba_impact_<0.2) {
 					this.setImpactRendementParasite(0.5);
 					return 0.5;
 				
 				}
-				if (proba_impact<0.1) {
+				else if (proba_impact_<0.1) {
 					this.setImpactRendementParasite(0.8);
 					return 0.8;
 					
 				}
+			}
+			else {
+				
 			}
 		}
 			return 1;
@@ -275,13 +292,17 @@ public class Parcelle {
 				dureeAleaClim = 3;
 				this.setDebutAleaClimatique(Filiere.LA_FILIERE.getEtape());
 				this.setAleaClimatique(true);
+			}
 		}
+		else {
+			this.setAleaClimatique(false);
+		}
+		
 		if (this.AleaClimatique == true) {
 			while (Filiere.LA_FILIERE.getEtape() - this.getDebutAleaClimatique() <= dureeAleaClim) {
 				dureeAleaClim = dureeAleaClim - 1; 
 			}
-		}
-
+			this.setAleaClimatique(false); 
 		}
 	}
 

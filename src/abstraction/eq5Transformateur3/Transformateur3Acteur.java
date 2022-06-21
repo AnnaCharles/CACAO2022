@@ -19,7 +19,7 @@ import abstraction.eq8Romu.produits.ChocolatDeMarque;
 import abstraction.eq8Romu.produits.Feve;
 import abstraction.eq8Romu.produits.Gamme;
 
-public class Transformateur3Acteur implements IActeur, IMarqueChocolat,IFabricantChocolatDeMarque{
+public class Transformateur3Acteur implements IActeur, IMarqueChocolat, IFabricantChocolatDeMarque{
 	
 	protected int cryptogramme;
 	protected Journal achats;
@@ -98,24 +98,36 @@ public class Transformateur3Acteur implements IActeur, IMarqueChocolat,IFabrican
 		Double s = 1000000.00;
 		this.stockFeves.ajouter(Feve.FEVE_MOYENNE_BIO_EQUITABLE, s);
 		this.stockFeves.ajouter(Feve.FEVE_HAUTE_BIO_EQUITABLE, s);
+		this.stockFeves.ajouter(Feve.FEVE_MOYENNE, s);
+		this.stockFeves.ajouter(Feve.FEVE_HAUTE, s);
 		
 		this.stockChocolat.ajouter(Chocolat.MQ_BE, s);
 		this.stockChocolat.ajouter(Chocolat.MQ_BE_O, s);
 		this.stockChocolat.ajouter(Chocolat.HQ_BE, s);
 		this.stockChocolat.ajouter(Chocolat.HQ_BE_O, s);
+		this.stockChocolat.ajouter(Chocolat.MQ, s);
+		this.stockChocolat.ajouter(Chocolat.MQ_O, s);
+		this.stockChocolat.ajouter(Chocolat.HQ, s);
+		this.stockChocolat.ajouter(Chocolat.HQ_O, s);
 		
 		this.perempFeves.ajouterQtt(this.dureePeremption.getValeur(),Feve.FEVE_MOYENNE_BIO_EQUITABLE,s);
 		this.perempFeves.ajouterQtt(this.dureePeremption.getValeur(),Feve.FEVE_HAUTE_BIO_EQUITABLE, s);
+		this.perempFeves.ajouterQtt(this.dureePeremption.getValeur(),Feve.FEVE_MOYENNE,s);
+		this.perempFeves.ajouterQtt(this.dureePeremption.getValeur(),Feve.FEVE_HAUTE, s);
 		
 		this.perempChocolat.ajouterQtt(this.dureePeremption.getValeur(),Chocolat.MQ_BE, s);
 		this.perempChocolat.ajouterQtt(this.dureePeremption.getValeur(),Chocolat.MQ_BE_O, s);
 		this.perempChocolat.ajouterQtt(this.dureePeremption.getValeur(),Chocolat.HQ_BE, s);
 		this.perempChocolat.ajouterQtt(this.dureePeremption.getValeur(),Chocolat.HQ_BE_O, s);
+		this.perempChocolat.ajouterQtt(this.dureePeremption.getValeur(),Chocolat.MQ, s);
+		this.perempChocolat.ajouterQtt(this.dureePeremption.getValeur(),Chocolat.MQ_O, s);
+		this.perempChocolat.ajouterQtt(this.dureePeremption.getValeur(),Chocolat.HQ, s);
+		this.perempChocolat.ajouterQtt(this.dureePeremption.getValeur(),Chocolat.HQ_O, s);
 		
 		this.stockFevesVariableM = new Variable(this.getNom()+"stockFevesMoyennes", "stock de feves moyenne qualite BE + non BE", this,  0, 100000000, this.stockFeves.getstock(Feve.FEVE_MOYENNE_BIO_EQUITABLE) + this.stockFeves.getstock(Feve.FEVE_MOYENNE) );
 		this.stockFevesVariableH = new Variable(this.getNom()+"stockFevesHautes", "stock de feves haute qualite BE + non BE",this,  0, 100000000, this.stockFeves.getstock(Feve.FEVE_HAUTE_BIO_EQUITABLE) + this.stockFeves.getstock(Feve.FEVE_HAUTE) );
-		this.stockChocolatVariableM = new Variable(this.getNom()+"stockChocolatMoyen", "stock de chocolat moyenne qualite",this,  0, 100000000, this.stockChocolat.getstock(Chocolat.MQ_BE)+this.stockChocolat.getstock(Chocolat.MQ_BE_O)  );
-		this.stockChocolatVariableH = new Variable(this.getNom()+"stockChocolatHaut", "stock de chocolat huate qualite ",this,  0, 100000000, this.stockChocolat.getstock(Chocolat.HQ_BE)+this.stockChocolat.getstock(Chocolat.HQ_BE_O)  );
+		this.stockChocolatVariableM = new Variable(this.getNom()+"stockChocolatMoyen", "stock de chocolat moyenne qualite",this,  0, 100000000, this.stockChocolat.getstock(Chocolat.MQ_BE)+this.stockChocolat.getstock(Chocolat.MQ_BE_O)+this.stockChocolat.getstock(Chocolat.MQ)+this.stockChocolat.getstock(Chocolat.MQ_O)  );
+		this.stockChocolatVariableH = new Variable(this.getNom()+"stockChocolatHaut", "stock de chocolat huate qualite ",this,  0, 100000000, this.stockChocolat.getstock(Chocolat.HQ_BE)+this.stockChocolat.getstock(Chocolat.HQ_BE_O)+this.stockChocolat.getstock(Chocolat.HQ)+this.stockChocolat.getstock(Chocolat.HQ_O)  );
 
 	}
 

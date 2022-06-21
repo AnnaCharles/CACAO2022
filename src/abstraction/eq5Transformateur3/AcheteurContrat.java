@@ -12,6 +12,7 @@ import abstraction.eq8Romu.contratsCadres.IVendeurContratCadre;
 import abstraction.eq8Romu.contratsCadres.SuperviseurVentesContratCadre;
 import abstraction.eq8Romu.filiere.Filiere;
 import abstraction.eq8Romu.produits.Feve;
+import abstraction.eq8Romu.produits.Gamme;
 
 public class AcheteurContrat extends AcheteurBourse  implements IAcheteurContratCadre {
 
@@ -20,6 +21,13 @@ public class AcheteurContrat extends AcheteurBourse  implements IAcheteurContrat
 	//Karla / Julien
 	/* Initier un contrat */
 	public void lanceruncontratAcheteur(Feve f, Double qtt) {
+		if (this.stockFeves.getstocktotal()+this.stockChocolat.getstocktotal()>0.9*this.capaciteStockageEQ5 || (this.stockChocolatVariableH.getValeur()>0.25*this.capaciteStockageEQ5 && 
+				f.getGamme()==Gamme.HAUTE) ||  (this.stockChocolatVariableM.getValeur()>0.25*this.capaciteStockageEQ5 && 
+						 f.getGamme()==Gamme.MOYENNE ) ) {
+		
+							
+						}
+		else {
 		SuperviseurVentesContratCadre superviseur = ((SuperviseurVentesContratCadre)(Filiere.LA_FILIERE.getActeur("Sup.CCadre")));
 		List<IVendeurContratCadre> L = superviseur.getVendeurs(f); 
 		
@@ -45,12 +53,15 @@ public class AcheteurContrat extends AcheteurBourse  implements IAcheteurContrat
 		}
 		//Julien else on achete des feve par le biais de la bourse si besoin ( bourse.getCours(f).getValeur() )
 	}
+	}
 	
 
 
 	// Julien & Karla
 	public boolean achete(Object produit) {
-		if  (!( produit instanceof Feve) ) {
+		if  (this.stockFeves.getstocktotal()+this.stockChocolat.getstocktotal()>0.9*this.capaciteStockageEQ5 || !( produit instanceof Feve)|| (this.stockChocolatVariableH.getValeur()>0.25*this.capaciteStockageEQ5 && 
+				((Feve) produit).getGamme()==Gamme.HAUTE) ||  (this.stockChocolatVariableM.getValeur()>0.25*this.capaciteStockageEQ5 && 
+						((Feve) produit).getGamme()==Gamme.MOYENNE ) ) {
 			return false;
 		}
 		if (this.stockFeves.getProduitsEnStock().contains((Feve) produit)) {
@@ -133,20 +144,19 @@ public class AcheteurContrat extends AcheteurBourse  implements IAcheteurContrat
 			/* Selon la place libre dans nos entrepots et selon l'etat de nos stocks pour cette feve,
 			 * on essaie d'initier des contrats 
 			 */
-			Double stocktotal = this.stockFeves.getstocktotal()+this.stockChocolat.getstocktotal();
+			Double stocktotal = this.stockChocolat.getstocktotal(); //+this.stockFeves.getstocktotal()
 			
-			if (stocktotal < this.capaciteStockageEQ5) {
-
-				//if (this.stockFeves.getstock(f) < this.SeuilMinFeves) {
-					Double placeLibre = this.capaciteStockageEQ5 - stocktotal;
-					if (placeLibre > 0.0) {
-					/* On essaie d'initier un contrat pour une qtt de placeLibre/nombre de types de fèves */
-						Double qtt = placeLibre/4;
-						lanceruncontratAcheteur(f, qtt/10);
-					}
-				//}
+			for (Feve fv : this.dispoFeves.keySet()) {
+				stocktotal += this.dispoFeves.get(fv);
+			}
+			
+			if (this.dispoFeves.get(f) < this.besoinFeves.get(f)) {
+					Double manque = this.besoinFeves.get(f) - this.dispoFeves.get(f);
+					/* On essaie d'initier un contrat */
+					Double qtt = manque;
+					lanceruncontratAcheteur(f, qtt/10);
+				}
 			}
 		}
-	}
 }
 	

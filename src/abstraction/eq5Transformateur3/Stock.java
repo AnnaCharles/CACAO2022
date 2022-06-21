@@ -14,6 +14,13 @@ public class Stock<Produit> {
 	public HashMap<Produit, Double> getStockDico() {
 		return stock;
 	}
+	public HashMap<Produit, Double> getCopie() {
+		HashMap<Produit, Double>copie = new HashMap <Produit, Double>();
+		for (Produit p : this.stock.keySet()) {
+			copie.put(p,  this.stock.get(p));
+		}
+		return copie;
+	}
 
 	//Mise à jour les stocks
 	public void ajouter(Produit p, double qtt) {

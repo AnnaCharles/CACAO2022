@@ -16,8 +16,8 @@ public class Transformateur3 extends VenteAppel {
 		//mise à jour des variables indicateurs des stocks
 		this.stockFevesVariableM.setValeur(this, this.stockFeves.getstock(Feve.FEVE_MOYENNE_BIO_EQUITABLE) + this.stockFeves.getstock(Feve.FEVE_MOYENNE));
 		this.stockFevesVariableH.setValeur(this, this.stockFeves.getstock(Feve.FEVE_HAUTE_BIO_EQUITABLE) + this.stockFeves.getstock(Feve.FEVE_HAUTE));
-		this.stockChocolatVariableM.setValeur(this, this.stockChocolat.getstock(Chocolat.MQ_BE)+this.stockChocolat.getstock(Chocolat.MQ_BE_O));
-		this.stockChocolatVariableH.setValeur(this, this.stockChocolat.getstock(Chocolat.HQ_BE)+this.stockChocolat.getstock(Chocolat.HQ_BE_O));
+		this.stockChocolatVariableM.setValeur(this, this.stockChocolat.getstock(Chocolat.MQ_BE)+this.stockChocolat.getstock(Chocolat.MQ_BE_O)+this.stockChocolat.getstock(Chocolat.MQ)+this.stockChocolat.getstock(Chocolat.MQ_O));
+		this.stockChocolatVariableH.setValeur(this, this.stockChocolat.getstock(Chocolat.HQ_BE)+this.stockChocolat.getstock(Chocolat.HQ_BE_O)+this.stockChocolat.getstock(Chocolat.HQ)+this.stockChocolat.getstock(Chocolat.HQ_O));
 		
 
 	}

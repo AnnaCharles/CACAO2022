@@ -6,6 +6,7 @@ import java.util.List;
 
 
 import abstraction.eq8Romu.filiere.Filiere;
+import abstraction.eq8Romu.general.Journal;
 import abstraction.eq8Romu.produits.Feve;
 
 //auteur : Fiona 
@@ -40,6 +41,8 @@ public abstract class Producteur2Plantation  {
 		
 		this.NbParcelles = new HashMap<Arbre, List<Parcelle>>();
 		this.ImpactMecontentement = 1; // c'est-à-dire que le rendement n'est pas modifié 
+		
+		
 		
 		// 1 parcelle = 10 000 arbres 
 		
@@ -76,7 +79,7 @@ public abstract class Producteur2Plantation  {
 		
 		ArrayList<Integer> qt = new ArrayList<Integer>();
 		
-		qt.add((int) (Math.ceil((200*NbTotalArbres)/5))); // HGB
+		qt.add((int) (Math.ceil((100*NbTotalArbres)/5))); // HGB
 		qt.add((int) (Math.ceil((800*NbTotalArbres)/5))); // HG
 		qt.add((int) (Math.ceil((400*NbTotalArbres)/5))); // MGB
 		qt.add((int) (Math.ceil((1600*NbTotalArbres)/5))); //MG 
@@ -87,8 +90,23 @@ public abstract class Producteur2Plantation  {
 	
 	
 	public void next() {
+		
 		this.renouvellement();
 		this.proportionBio();
+		this.renouvellement2();
+		Arbre[] arbres = {Arbre.ARBRE_HGB,Arbre.ARBRE_HG,Arbre.ARBRE_MGB,Arbre.ARBRE_MG,Arbre.ARBRE_BG};
+		for (Arbre a: arbres) {
+			
+			List<Parcelle> ListeParcelles = this.NbParcelles.get(a);
+			for (Parcelle p : ListeParcelles) {
+				p.next();
+			}
+			
+		}	
+		
+	
+		
+		
 	}
 	
 	
@@ -130,6 +148,42 @@ public abstract class Producteur2Plantation  {
 		return (bio/total);
 
 	}
+	public double proportionArbre(Feve feve) {
+		Arbre arbre = conversion(feve);
+		Double quantite = 0.0;
+		for (Feve f : Feve.values()) {
+			quantite+=this.getNbArbreTotal(f);
+		}
+		return (this.getNbArbreTotal(feve)/quantite);
+	}
+		
+	
+	public double difference(Feve feve) {
+		return (this.proportionVente(feve)-this.proportionArbre(feve));
+	}
+	
+	
+	public void renouvellement2() {
+		
+		// auteur : Jules 
+		
+		for (Feve f : Feve.values()) {
+			if (difference(f)>0.05) {
+			//if (difference(f)>0.05 && this.getNbArbreTotal(f)< 15000000) {
+				for (int i=0;i<5;i++) {
+					this.NbParcelles.get(conversion(f)).add(new Parcelle(this.conversion(f),0));
+				}
+			}
+			if (difference(f)<-0.2) {
+				//if (difference(f)<-0.2 && this.getNbArbreTotal(f)>20000000) 
+				for (int i=0;i<5;i++)
+					this.NbParcelles.get(conversion(f)).remove(this.NbParcelles.get(conversion(f)).get(0));
+				}
+		}
+	
+	}
+	
+	
 	
 	public abstract double proportionVente(Feve f);
 	
@@ -159,11 +213,13 @@ public abstract class Producteur2Plantation  {
 		 * 
 		 * Dans Producteur2VendeurContratCadre, proportionVente(Feve f) permet de donner la 
 		 * proportion que représente les ventes de fèves f par rapport aux ventes totales de contrats
-		 * cadres pour les 50 derniers steps. 
+		 * cadres pour les 20 derniers steps. 
 		 * A partir de ces données, on décide de replanter tel ou tel type de fève. 
 		 *
 		 */	
 		
+		Feve FeveAPlanter = FevePlusVendue();
+		Arbre ArbreAPlanter = conversion(FeveAPlanter);
 
 		Arbre[] arbres = {Arbre.ARBRE_HGB,Arbre.ARBRE_HG,Arbre.ARBRE_MGB,Arbre.ARBRE_MG,Arbre.ARBRE_BG};
 		for (Arbre a: arbres) {
@@ -178,7 +234,7 @@ public abstract class Producteur2Plantation  {
 			}
 			for (int i=0; i < ParcellesASupprimer.size(); i++) {
 				this.NbParcelles.get(a).remove(ParcellesASupprimer.get(i));
-				this.NbParcelles.get(a).add(new Parcelle(a, 0));
+				this.NbParcelles.get(ArbreAPlanter).add(new Parcelle(ArbreAPlanter,0));
 			}							
 			
 		}
@@ -287,6 +343,8 @@ public abstract class Producteur2Plantation  {
 				} 		
 			}
 		
+	
+		
 		}
 		
 		
@@ -317,7 +375,7 @@ public abstract class Producteur2Plantation  {
 
 	}
 	
-	public int getNbArbre(Feve feve) {
+	public int getNbArbreTotal(Feve feve) {
 		//auteur : Fiona
 		
 		Arbre arbre = conversion(feve);

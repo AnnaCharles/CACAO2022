@@ -44,6 +44,7 @@ public class Producteur2VendeurBourse extends Producteur2Transfo implements IVen
 		res.add(this.journal);
 		res.add(journalCC);
 		res.add(journalBourse);
+		res.add(this.journalplantation);
 		return res;
 	}
 }

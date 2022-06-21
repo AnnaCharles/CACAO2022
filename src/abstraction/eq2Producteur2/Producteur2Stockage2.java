@@ -20,6 +20,7 @@ public abstract class Producteur2Stockage2 extends Producteur2Couts {
 
 	
 	public Producteur2Stockage2() {
+		// auteur : Clément 
 		super();
 		
 		this.Stocks = new HashMap<Feve,LinkedList<Stock>>();
@@ -29,6 +30,7 @@ public abstract class Producteur2Stockage2 extends Producteur2Couts {
 	}
 
 	public void removeQuantite(double q, Feve f) {
+		// auteur : Clément 
 		LinkedList<Stock> L=this.Stocks.get(f);	
 
 		for (int k=0;k<30;k++) {
@@ -51,6 +53,7 @@ public abstract class Producteur2Stockage2 extends Producteur2Couts {
 	}
 	
 	public void addQuantite(double q, Feve f) {
+		// auteur : Clément 
 		this.Stocks.get(f).add(new Stock(q));
 	}
 	
@@ -66,7 +69,7 @@ public abstract class Producteur2Stockage2 extends Producteur2Couts {
 	public void initialiser() {
 		super.initialiser();
 		for (Feve feve : Feve.values()) {
-			int qt = super.getNbArbre(feve);
+			int qt = super.getNbArbreTotal(feve);
 			this.addQuantite(qt, feve);
 		}
 		
@@ -74,6 +77,7 @@ public abstract class Producteur2Stockage2 extends Producteur2Couts {
 	}
 
 	public void next() {
+		// auteur : Clément 
 		super.next();
 		for(Feve feve : Feve.values()) {
 			this.addQuantite(this.production(feve), feve);
@@ -84,9 +88,11 @@ public abstract class Producteur2Stockage2 extends Producteur2Couts {
 
 
 	public HashMap<Feve, LinkedList<Stock>> getStocks() {
+		// auteur : Clément 
 		return this.Stocks;
 	}
 	public void Peremption() {
+		// auteur : Clément 
 		for (Feve f : Feve.values()) {    						//On retire les fèves périmées 
 			for (int i=0;i<this.Stocks.get(f).size();i++) {
 				if (this.Stocks.get(f).get(i).isPerime()==true) {
@@ -97,6 +103,9 @@ public abstract class Producteur2Stockage2 extends Producteur2Couts {
 	}
 	
 	public void Parasites() {
+		// auteur : Clément 
+		
+		
 		// Differentiation entre gammes / bio :
 		// bio : 20% par UT
 		// non bio : 10% par UT

@@ -66,7 +66,77 @@ public abstract class Transformateur2Stock extends Transformateur2ContratCadreVe
 						this.journalStock.ajouter("stock de chocolat de marque "+c+" : "+this.stockchocolatdemarque.getStock().get(c));
 					}
 				}
+
+				//Mise à jour des listes des chocolats vendus
+//				List<ExemplaireContratCadre> ListCC= this.getMesContratEnTantQueVendeur();
+//				
+//				for(ExemplaireContratCadre CC : ListCC) {
+//					Echeancier E=CC.getEcheancier();
+//					this.vente_choco.ajouter((ChocolatDeMarque) CC.getProduit(), E.getQuantite(Filiere.LA_FILIERE.getEtape()-1));
+//				}
+//				//Listes de toutes les fèves disponibles
+//				Feve [] Feves = new Feve[5];
+//				Feves[0]=Feve.FEVE_BASSE;
+//				Feves[1]=Feve.FEVE_MOYENNE;
+//				Feves[2]=Feve.FEVE_MOYENNE_BIO_EQUITABLE;
+//				Feves[3]=Feve.FEVE_HAUTE;
+//				Feves[4]=Feve.FEVE_HAUTE_BIO_EQUITABLE;
+//				
+//				//remise à niveau des listes de péremption
+//				for(Feve f: Feves) {
+//					if(this.achat_feve.get(f).size()<Filiere.LA_FILIERE.getEtape()-1) {
+//						this.achat_feve.get(f).add(0.0);;
+//						
+//					}
+//				}
+//				for(Feve f: Feves) {
+//					if(this.transfo_feve.get(f).size()<Filiere.LA_FILIERE.getEtape()-1) {
+//						this.transfo_feve.get(f).add(0.0);;
+//						
+//					}
+//				}
+//				
+//				for(ChocolatDeMarque c: this.getChocolatsProduits()) {
+//					if(this.transfo_choco.get(c).size()<Filiere.LA_FILIERE.getEtape()-1) {
+//						this.transfo_choco.get(c).add(0.0);
+//						
+//					}
+//				}
+//				for(ChocolatDeMarque c: this.getChocolatsProduits()) {
+//					if(this.vente_choco.get(c).size()<Filiere.LA_FILIERE.getEtape()-1) {
+//						this.vente_choco.get(c).add(0.0);
+//						
+//					}
+//				}
+//				
+//				
+//				//maj des stocks
+//				for(Feve f: Feves) {
+//					
+//				int date= (int) (Filiere.LA_FILIERE.getEtape()-Filiere.LA_FILIERE.getIndicateur("dureePeremption").getValeur());
+//				if (date>0){
+//				double diff=this.achat_feve.getQuantiteAuStep(f,date)-this.transfo_feve.getQuantUtiliseeDepuis(f,date);
+//				
+//				if(diff>0) {
+//					//this.stockfeve.enlever(f, diff);
+//					journalStock.ajouter("Ce tour, "+diff+" kg de "+f+" devrait périmé et ont été retiré des stocks.");
+//				}
+//				}
+//				}
+//				;
+//				for (ChocolatDeMarque c : this.getChocolatsProduits()) {
+//					int date= (int) (Filiere.LA_FILIERE.getEtape()-Filiere.LA_FILIERE.getIndicateur("dureePeremption").getValeur());
+//					if (date>0){
+//					double diff=this.transfo_choco.getQuantiteAuStep(c,date)-this.vente_choco.getQuantUtiliseeDepuis(c,date);
+//					
+//					if(diff>0) {
+//						//this.stockchocolatdemarque.enlever(c, diff);
+//						journalStock.ajouter("Ce tour, "+diff+" kg de "+c+" devrait périmé et ont été retiré des stocks.");
+//					}
+//					}
+//				}
 				
+			
 				
 				
 		//On paye le cout de stockage

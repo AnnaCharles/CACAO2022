@@ -19,6 +19,7 @@ public class VenteAppel extends VenteContrat implements IVendeurAO {
 		/* on pourrait comparer les acheteurs en fonction de la fidélité par ex 
 		 * on initie original à 0 de façon à pouvoir calculer le prix qui permet de ne pas vendre à perte
 		 * les propositions sont triées par ordre décroissant de prix -> on ne considère que la première pour l'instant */
+		this.ventes.ajouter("on a " + propositions.size() + " offres par AO");
 		
 		int original = 0;
 		
@@ -51,29 +52,40 @@ public class VenteAppel extends VenteContrat implements IVendeurAO {
 		super.next();
 		SuperviseurVentesAO superviseur = (SuperviseurVentesAO)(Filiere.LA_FILIERE.getActeur("Sup.AO"));
 		for (Chocolat c: this.stockChocolat.getProduitsEnStock()) {
-			/* Si on a un stock suffisant, on essaie de liquider la moitie */
-			if (this.stockChocolat.getstock(c)>this.SeuilMinChocolat) {
-				PropositionAchatAO retenueenTG = 
-					superviseur.vendreParAO(this, this.cryptogramme, new ChocolatDeMarque(c,"BIO'riginal"), this.stockChocolat.getstock(c)/2, true);
-					if (retenueenTG!=null) {
-						this.utiliser(c, retenueenTG.getOffre().getQuantiteKG()); 
-						this.ventes.ajouter("vente par AO de "+retenueenTG.getOffre().getQuantiteKG()+"  kg de " + c.name() +"  a "
-						+retenueenTG.getAcheteur().getNom()+" en TG" + "a un prix de " + retenueenTG.getPrixKg());
-					} else {
-						// on essaye sans mettre en TG
-						PropositionAchatAO retenuepasenTG = 
-								superviseur.vendreParAO(this, this.cryptogramme, new ChocolatDeMarque(c,"BIO'riginal"), this.stockChocolat.getstock(c)/2, false);
-						if (retenuepasenTG!=null) {
-							this.utiliser(c, retenuepasenTG.getOffre().getQuantiteKG()); 
-							this.ventes.ajouter("vente par AO de "+retenuepasenTG.getOffre().getQuantiteKG()+"kg  de " + c.name() +" a "
-							+retenuepasenTG.getAcheteur().getNom() + "a un prix de " + retenueenTG.getPrixKg());
-						} else {
-							this.ventes.ajouter("pas d'offre retenue");
-						}
+			Gamme g = c.getGamme();
+			boolean be = c.isBioEquitable();
+			ChocolatDeMarque cdm = null;
+			for (Feve f : this.stockFeves.getProduitsEnStock()) {
+				if (f.getGamme() == g && f.isBioEquitable() == be) {
+					if (be) { 
+						cdm = new ChocolatDeMarque(c,"BIO'riginal");
+					}
+					else { 
+						cdm = new ChocolatDeMarque(c,"CHOCO'riginal");
+					}
+					/* Si on a un stock suffisant, on essaie de liquider une partie */
+					if (this.stockChocolat.getstock(c)>this.besoinFeves.get(f)) {
+							PropositionAchatAO retenueenTG = superviseur.vendreParAO(this, this.cryptogramme, cdm, this.stockChocolat.getstock(c), true);
+							if (retenueenTG!=null) {
+								this.utiliser(c, retenueenTG.getOffre().getQuantiteKG()); 
+								this.ventes.ajouter("vente par AO de "+retenueenTG.getOffre().getQuantiteKG()+"  kg de " + c.name() +"  a " +retenueenTG.getAcheteur().getNom()+" en TG" + "a un prix de " + retenueenTG.getPrixKg());
+							} 
+							else {
+								// on essaye sans mettre en TG
+								PropositionAchatAO retenuepasenTG = superviseur.vendreParAO(this, this.cryptogramme, cdm, this.stockChocolat.getstock(c), false);
+								if (retenuepasenTG!=null) {
+									this.utiliser(c, retenuepasenTG.getOffre().getQuantiteKG()); 
+									this.ventes.ajouter("vente par AO de "+retenuepasenTG.getOffre().getQuantiteKG()+"kg  de " + c.name() +" a " +retenuepasenTG.getAcheteur().getNom() + "a un prix de " + retenueenTG.getPrixKg());
+								} 
+								else {
+									this.ventes.ajouter("pas d'offre retenue");
+								}
+						
+							}
 					}
 				}
 			}
 		}
-			
+	}		
 
 }
