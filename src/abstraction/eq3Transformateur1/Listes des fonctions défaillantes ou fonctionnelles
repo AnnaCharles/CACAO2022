@@ -1,0 +1,30 @@
+mise à jour du nombre de fèves stockage ok
+mise à jour du nombre de chocolats stockage ok
+prise en compte de la date de péremption ok
+Détermination du prix maximum d'achat ok
+Détermination des quantités et du type ok
+Contrat cadre achat ok
+Bourse ok
+Détermination du prix de vente minimum ok
+Lancement d'appels d'offre ok
+Contrat cadre vente ok
+Choix de la quantité à produire ok
+Choix transformation ok
+Tranformation ok
+
+Bugs détectés : 
+coûts de stockage négatifs car quantité de chocolats haute qualité négatives
+
+Les fèves HE ne périment jamais car on a ils la péremption uniquement sur le chocolat puisqu'on a pour stratégie de transformer 
+immédiatement tout nos stocks de fèves. Donc aucune fèves ne périme, mais cela ne pose pas de problèmes pour les fèves MQ, MQ_BE et BQ.
+
+On paie des couts de stockage qui n'ont pas lieu d'êtres : on calcule le montant et on paie à a fin de nore next(). 
+On paie donc le cout de stockage du chocolat qu'on vient de produire et qui sera livré lors du même tour aux distributeurs
+Pour corriger : séparer le paiement de stockage en 2 : au début du next on paie celui des chocos : correspond aux invendus
+et en fin de tour on paie celui des fèves : correspond aux fèves non transformées
+
+bugs avec chocoPeremption : DicoChocoPeremption.venteLot déclenche une erreur car la liste des lots est vide.
+Ce qui signifie que nos stocks seraient vide alors que pour initier une appel d'offre, on regarde au préalable
+si le stock est supérieur à la quantité qu'on doit livrer par contrat cadre et si la diffrénece est positive,
+alors on revend cette différence qui correspond au surplus. Donc le stock ne peut pas être vide. Il y a donc
+décalage entre le stock de choco et les lots de choco.

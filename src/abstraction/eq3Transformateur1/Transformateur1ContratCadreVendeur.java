@@ -25,15 +25,16 @@ public class Transformateur1ContratCadreVendeur extends Transformateur1Bourse im
 		this.mesContratEnTantQueVendeur=new LinkedList<ExemplaireContratCadre>();
 	}
 	
-	// fonction qui détermine quel type de chocolat on vend en contrat cadre; auteur Julien */
+	/** fonction qui détermine quel type de chocolat on vend en contrat cadre; auteur Julien 
+	 *  correction : maintenant on regarde le nom de marque pour ne vendre que du chocolat cote d'or ; Alexandre */
 	public boolean vend(Object produit) {
 		//journal.ajouter("debut CC avec distrib");
 
-		if (produit instanceof ChocolatDeMarque){
+		if (produit instanceof ChocolatDeMarque && ((ChocolatDeMarque) produit).getMarque() == "cote d'or"){
 			if ((((ChocolatDeMarque)produit).getChocolat()==Chocolat.MQ)
 					||(((ChocolatDeMarque)produit).getChocolat()==Chocolat.MQ_BE)
 					||(((ChocolatDeMarque)produit).getChocolat()==Chocolat.MQ_O)) {
-				journalCCV.ajouter("On veut bien vendre ce chocolat");
+				journalCCV.ajouter("On veut bien vendre " + produit);
 				return true;
 			}
 		}
@@ -81,6 +82,12 @@ public class Transformateur1ContratCadreVendeur extends Transformateur1Bourse im
 	public void notificationNouveauContratCadre(ExemplaireContratCadre contrat) {
 		mesContratEnTantQueVendeur.add(contrat);
 		
+		journalCCV.ajouter("nouveau contrat cadre vendeur signé");
+		journalCCV.ajouter("Acheteur : "+ contrat.getAcheteur().getNom());
+		journalCCV.ajouter("Produit : " + contrat.getProduit() + " " + ((ChocolatDeMarque)contrat.getProduit()).getChocolat());
+		journalCCV.ajouter("Echeancier : " + contrat.getEcheancier());
+		journalCCV.ajouter("Prix : " + contrat.getPrix());
+		
 		//System.out.println("notif new CC");
 		//System.out.println("dsitrib : "+ dernierPrixVenteChocoReset.getDistributeurs() + ", choco : " + dernierPrixVenteChocoReset.getChocolats() );
 		
@@ -100,28 +107,33 @@ public class Transformateur1ContratCadreVendeur extends Transformateur1Bourse im
 				
 			}
 		}
-		 
-		journalCCV.ajouter("nouveau contrat cadre vendeur signé");
-		journalCCV.ajouter("Acheteur : "+ contrat.getAcheteur().getNom());
-		journalCCV.ajouter("Produit : " + contrat.getProduit() + " " + ((ChocolatDeMarque)contrat.getProduit()).getChocolat());
-		journalCCV.ajouter("Echeancier : " + contrat.getEcheancier());
-		journalCCV.ajouter("Prix : " + contrat.getPrix());
 		
 	}
 
-	// modification du stock ; auteur Julien */
-	// modification du stock en fonction de la date de péremption (commencer par le plus ancien, auteur : Anna */
+	/** modification du stock ; auteur Julien
+	 *  modification du stock en fonction de la date de péremption (commencer par le plus ancien, auteur : Anna
+	 *  correction : avant lorsqu'on n'avait pas assez pour satisfaire la demande, on livrait ce qu'on pouvait mais on oubliait d'acutaliser les stockss ; Alexandre */
+	
 	 public double livrer(Object produit, double quantite, ExemplaireContratCadre contrat) {
 		double livre = Math.min(stockChoco.get(((ChocolatDeMarque)contrat.getProduit()).getChocolat()), quantite);
 		livre = Math.max(0., livre);
 		if (livre==quantite) {
-			
+			//System.out.println("________________livre = qt________________ Etape : " + Filiere.LA_FILIERE.getEtape());
+			//System.out.println("Acheteur : " + contrat.getAcheteur().getNom());
+			//System.out.println("Produit : " + contrat.getProduit());
+			//System.out.println("Nousveau stock : " + (stockChoco.get(((ChocolatDeMarque)contrat.getProduit()).getChocolat())-quantite));
 			stockChoco.put(((ChocolatDeMarque)contrat.getProduit()).getChocolat(),stockChoco.get(((ChocolatDeMarque)contrat.getProduit()).getChocolat())-quantite);
 			stockChocoPeremption.venteLot(((ChocolatDeMarque)contrat.getProduit()).getChocolat(), quantite);
 			return quantite;					
 		}
-
-	return livre;
+		//System.out.println("!!!_____________livre < qt_____________!!! Etape : " + Filiere.LA_FILIERE.getEtape());
+		//System.out.println("Acheteur : " + contrat.getAcheteur().getNom());
+		//System.out.println("Produit : " + contrat.getProduit());
+		//System.out.println("Quantité à livrer : " + contrat.getQuantiteALivrerAuStep());
+		//System.out.println("Nousveau stock : " + (stockChoco.get(((ChocolatDeMarque)contrat.getProduit()).getChocolat())-livre));
+		stockChoco.put(((ChocolatDeMarque)contrat.getProduit()).getChocolat(),stockChoco.get(((ChocolatDeMarque)contrat.getProduit()).getChocolat())-livre);
+		stockChocoPeremption.venteLot(((ChocolatDeMarque)contrat.getProduit()).getChocolat(), livre);
+		return livre;
 	}
 		
 	

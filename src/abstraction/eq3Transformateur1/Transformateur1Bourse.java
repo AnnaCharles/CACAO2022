@@ -24,8 +24,6 @@ public class Transformateur1Bourse extends Transformateur1Acteur implements IAch
 	protected dernierPrixVenteChoco dernierPrixVenteChocoReset; /** commence le tour avec des valeurs nulles partout et remplace les valeurs par le prix vente mon negocie durant le tour */
 	protected DicoFeve prixAchatFeve;
 	protected DicoChoco prixVenteMin;        // prix minimal de vente pour chaque chocolat à ce tour (à mettre à jour avec prixVenteMin())
-	protected DicoChoco stockChoco;
-	protected DicoFeve stockFeve;
 
 	protected DicoChocoPeremption stockChocoPeremption ;
 
@@ -39,8 +37,6 @@ public class Transformateur1Bourse extends Transformateur1Acteur implements IAch
 		dernierPrixVenteChocoReset = new dernierPrixVenteChoco();
 		prixAchatFeve = new DicoFeve();
 		prixVenteMin = new DicoChoco();
-		stockChoco = new DicoChoco();
-		stockFeve = new DicoFeve();
 		stockChocoPeremption= new DicoChocoPeremption();
 		
 	}

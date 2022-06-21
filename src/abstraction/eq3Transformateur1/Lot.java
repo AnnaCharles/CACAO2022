@@ -12,7 +12,6 @@ public class Lot{
 	private int date;
 	
 	public Lot(double quantite, int date) {
-		super();
 		this.quantite = quantite ;
 		this.date = date;
 	}
